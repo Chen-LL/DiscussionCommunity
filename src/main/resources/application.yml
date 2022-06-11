@@ -1,0 +1,5 @@
+spring:
+  profiles:
+    active: dev
+mybatis-plus:
+  mapper-locations: classpath:/com/kuney/community/application/mapper/xml/*.xml
