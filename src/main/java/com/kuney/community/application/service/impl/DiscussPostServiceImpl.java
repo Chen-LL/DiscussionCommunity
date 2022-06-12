@@ -31,10 +31,13 @@ public class DiscussPostServiceImpl extends ServiceImpl<DiscussPostMapper, Discu
 
     private UserService userService;
 
+    @SuppressWarnings("unchecked")
     @Override
     public Page<DiscussPost> getIndexPage(Integer pageNum) {
-        Page<DiscussPost> page = new Page<>(pageNum, Constants.PAGE_SIZE);
-        this.page(page);
+        Page<DiscussPost> page = this.lambdaQuery()
+                .ne(DiscussPost::getStatus, 2)
+                .orderByDesc(DiscussPost::getType, DiscussPost::getStatus, DiscussPost::getCreateTime)
+                .page(new Page<>(pageNum, Constants.PAGE_SIZE));
         List<DiscussPost> discussPosts = page.getRecords();
         if (ObjCheckUtils.nonEmpty(discussPosts)) {
             Set<Integer> userIds = discussPosts.stream().map(DiscussPost::getUserId).collect(Collectors.toSet());
