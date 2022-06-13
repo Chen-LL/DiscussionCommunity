@@ -21,4 +21,9 @@ public interface Constants {
         int DEFAULT_EXPIRE_SECONDS = 60 * 60 * 12; // 12小时
         int REMEMBER_EXPIRE_SECONDS = 60 * 60 * 24 * 7; // 一周
     }
+
+    interface Location {
+        String LOCAL = "local";
+        String REMOTE = "remote";
+    }
 }

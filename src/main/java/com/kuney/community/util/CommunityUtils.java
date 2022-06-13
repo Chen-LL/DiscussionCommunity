@@ -6,9 +6,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.io.File;
+import java.io.IOException;
+import java.util.UUID;
 
 /**
  * @author kuneychen
@@ -23,6 +27,10 @@ public class CommunityUtils {
 
     @Value("${spring.mail.username}")
     private String from;
+    @Value("${user.image.path}")
+    private String path;
+    @Value("${user.image.upload-location}")
+    private String location;
 
     /**
      * 发送简单邮件
@@ -45,4 +53,23 @@ public class CommunityUtils {
         }
     }
 
+    public String uploadImage(MultipartFile headImage, String suffix) {
+        if (Constants.Location.LOCAL.equals(location)) {
+            return uploadToLocal(headImage, suffix);
+        }
+        // TODO 上传到云服务
+        return "";
+    }
+
+    private String uploadToLocal(MultipartFile headImage, String suffix) {
+        String fileName = UUID.randomUUID().toString().replaceAll("-", "") + suffix;
+        String dest = path + fileName;
+        try {
+            headImage.transferTo(new File(dest));
+        } catch (IOException e) {
+            log.error("上传文件失败：{}", e.getMessage());
+            e.printStackTrace();
+        }
+        return fileName;
+    }
 }

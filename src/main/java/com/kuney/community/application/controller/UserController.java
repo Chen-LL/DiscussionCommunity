@@ -2,28 +2,36 @@ package com.kuney.community.application.controller;
 
 
 import com.google.code.kaptcha.Producer;
+import com.kuney.community.annotation.LoginRequired;
 import com.kuney.community.application.entity.User;
 import com.kuney.community.application.service.UserService;
+import com.kuney.community.util.CommunityUtils;
 import com.kuney.community.util.Constants;
+import com.kuney.community.util.HostHolder;
 import com.kuney.community.util.ObjCheckUtils;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 
 /**
  * <p>
- *  前端控制器
+ * 前端控制器
  * </p>
  *
  * @author kuneychen
@@ -31,12 +39,30 @@ import java.util.Map;
  */
 @Controller
 @RequestMapping("/user")
-@AllArgsConstructor
 @Slf4j
 public class UserController {
 
+    @Value("${server.servlet.context-path}")
+    private String contextPath;
+    @Value("${community.domain}")
+    private String domain;
+    @Value("${user.image.path}")
+    private String imagePath;
+
     private UserService userService;
     private Producer kaptchaProducer;
+    private CommunityUtils communityUtils;
+    private HostHolder hostHolder;
+
+    public UserController(UserService userService,
+                          Producer kaptchaProducer,
+                          CommunityUtils communityUtils,
+                          HostHolder hostHolder) {
+        this.userService = userService;
+        this.kaptchaProducer = kaptchaProducer;
+        this.communityUtils = communityUtils;
+        this.hostHolder = hostHolder;
+    }
 
     @GetMapping("register")
     public String toRegister() {
@@ -84,7 +110,7 @@ public class UserController {
             return "site/login";
         }
         int expireSeconds = rememberMe != null && rememberMe ?
-        Constants.Login.REMEMBER_EXPIRE_SECONDS : Constants.Login.DEFAULT_EXPIRE_SECONDS;
+                Constants.Login.REMEMBER_EXPIRE_SECONDS : Constants.Login.DEFAULT_EXPIRE_SECONDS;
         Map<String, Object> map = userService.userLogin(username, password, expireSeconds);
         if (map.containsKey("ticket")) {
             Cookie cookie = new Cookie("ticket", (String) map.get("ticket"));
@@ -115,6 +141,54 @@ public class UserController {
             ImageIO.write(image, "png", response.getOutputStream());
         } catch (IOException e) {
             log.error("获取验证码失败：{}", e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @LoginRequired
+    @GetMapping("setting")
+    public String setting() {
+        return "site/setting";
+    }
+
+    @LoginRequired
+    @PostMapping("upload")
+    public String upload(MultipartFile headImage, Model model) {
+        if (ObjCheckUtils.isNull(headImage)) {
+            model.addAttribute("uploadMsg", "请选择一个文件");
+            return "site/setting";
+        }
+        String originalFilename = headImage.getOriginalFilename();
+        String suffix = originalFilename.substring(originalFilename.lastIndexOf("."));
+        if (ObjCheckUtils.isBlank(suffix) || !Arrays.asList(".png", ".jpg", ".jpeg").contains(suffix)) {
+            model.addAttribute("uploadMsg", "文件格式错误！仅支持.png, .jpg, .jpeg格式文件");
+            return "site/setting";
+        }
+        String fileName = communityUtils.uploadImage(headImage, suffix);
+        String url = domain + contextPath + "/user/header/" + fileName;
+        userService.lambdaUpdate()
+                .set(User::getHeaderUrl, url)
+                .eq(User::getId, hostHolder.getUser().getId())
+                .update();
+        model.addAttribute("msg", "头像上传成功！");
+        model.addAttribute("target", "/");
+        return "site/operate-result";
+    }
+
+    @GetMapping("header/{fileName}")
+    public void getHeader(@PathVariable String fileName, HttpServletResponse response) {
+        String suffix = fileName.substring(fileName.lastIndexOf("."));
+        fileName = imagePath + fileName;
+        response.setContentType("image/" + suffix);
+        try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(fileName))) {
+            ServletOutputStream outputStream = response.getOutputStream();
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, len);
+            }
+        } catch (IOException e) {
+            log.error("获取头像失败：{}", e.getMessage());
             e.printStackTrace();
         }
     }

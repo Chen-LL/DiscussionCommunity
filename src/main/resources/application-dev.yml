@@ -33,6 +33,10 @@ spring:
         smtp:
           ssl:
             enable: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 100MB
 
 mybatis-plus:
   configuration:
