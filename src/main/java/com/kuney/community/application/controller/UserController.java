@@ -7,6 +7,7 @@ import com.kuney.community.application.entity.User;
 import com.kuney.community.application.service.UserService;
 import com.kuney.community.util.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -195,7 +196,7 @@ public class UserController {
     public String updatePassword(@CookieValue("ticket") String ticket, Model model,
                                  String oldPassword, String newPassword) {
         User user = hostHolder.getUser();
-        if (!user.getPassword().equals(EncodeUtils.encodePassword(oldPassword, user.getSalt()))) {
+        if (!StringUtils.equals(user.getPassword(), EncodeUtils.encodePassword(oldPassword, user.getSalt()))) {
             model.addAttribute("msg", "原密码错误！");
             return "site/setting";
         }

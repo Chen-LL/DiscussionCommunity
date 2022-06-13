@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kuney.community.application.entity.DiscussPost;
 import com.kuney.community.application.service.DiscussPostService;
 import com.kuney.community.util.CommunityUtils;
+import com.kuney.community.util.SensitiveWordFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,18 @@ class DisscussionCommunityApplicationTests {
         context.setVariable("url", url);
         String content = templateEngine.process("mail/activation", context);
         communityUtils.sendSimpleMail(to, subject, content);
+    }
+
+
+    @Autowired
+    SensitiveWordFilter sensitiveWordFilter;
+
+    @Test
+    void testSensitiveFilter() {
+        String text = "※aa※bca※a※b※bqqqqc※c※";
+        String text2 = sensitiveWordFilter.filter(text);
+        log.info("过滤前：{}", text);
+        log.info("过滤后：{}", text2);
     }
 
 }
