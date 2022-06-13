@@ -5,10 +5,7 @@ import com.google.code.kaptcha.Producer;
 import com.kuney.community.annotation.LoginRequired;
 import com.kuney.community.application.entity.User;
 import com.kuney.community.application.service.UserService;
-import com.kuney.community.util.CommunityUtils;
-import com.kuney.community.util.Constants;
-import com.kuney.community.util.HostHolder;
-import com.kuney.community.util.ObjCheckUtils;
+import com.kuney.community.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -191,6 +188,21 @@ public class UserController {
             log.error("获取头像失败：{}", e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    @LoginRequired
+    @PutMapping("password")
+    public String updatePassword(@CookieValue("ticket") String ticket, Model model,
+                                 String oldPassword, String newPassword) {
+        User user = hostHolder.getUser();
+        if (!user.getPassword().equals(EncodeUtils.encodePassword(oldPassword, user.getSalt()))) {
+            model.addAttribute("msg", "原密码错误！");
+            return "site/setting";
+        }
+        userService.updatePassword(newPassword, ticket, user);
+        model.addAttribute("msg", "密码修改成功，请重新登录！");
+        model.addAttribute("target", "/user/login");
+        return "site/operate-result";
     }
 }
 

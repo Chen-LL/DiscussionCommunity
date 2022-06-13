@@ -40,4 +40,6 @@ public interface UserService extends IService<User> {
     Map<String, Object> userLogin(String username, String password, int expireSeconds);
 
     void userLogout(String ticket);
+
+    void updatePassword(String newPassword, String ticket, User user);
 }

@@ -14,6 +14,7 @@ import com.kuney.community.util.ObjCheckUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
@@ -136,5 +137,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .set(LoginTicket::getStatus, 1)
                 .eq(LoginTicket::getTicket, ticket)
                 .update();
+    }
+
+
+    @Transactional
+    @Override
+    public void updatePassword(String newPassword, String ticket, User user) {
+        newPassword = EncodeUtils.encodePassword(newPassword,user.getSalt());
+        this.lambdaUpdate()
+                .set(User::getPassword, newPassword)
+                .eq(User::getId, user.getId())
+                .update();
+        this.userLogout(ticket);
     }
 }
