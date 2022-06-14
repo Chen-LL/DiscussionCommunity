@@ -22,11 +22,14 @@
                 <div class="form-group row">
                     <label for="username" class="col-sm-2 col-form-label text-right">账号:</label>
                     <div class="col-sm-10">
-                        <input type="text" th:class="|form-control ${resultCode==0 ? 'is-invalid' : ''}|"
+                        <input type="text" th:class="|form-control ${resultCode==0 or resultCode==3 ? 'is-invalid' : ''}|"
                                th:value="${param.username}" name="username"
                                id="username" placeholder="请输入您的账号!" required>
-                        <div class="invalid-feedback">
+                        <div class="invalid-feedback" th:if="${resultCode==0}">
                             该账号不存在！
+                        </div>
+                        <div class="invalid-feedback" th:if="${resultCode==3}">
+                            该账号尚未激活，无法使用！
                         </div>
                     </div>
                 </div>

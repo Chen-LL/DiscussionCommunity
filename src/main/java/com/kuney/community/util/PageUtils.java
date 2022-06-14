@@ -23,4 +23,16 @@ public class PageUtils {
                 .setSize(pageSize)
                 .setRecords(list);
     }
+
+    /**
+     *
+     * @param pages 总页数
+     * @param pageNum 当前页
+     * @return 页码范围[begin, end]
+     */
+    public static long[] getPageRange(long pages, long pageNum) {
+        long pageEnd = Math.min(pages, Math.max(5, pageNum + 1));
+        long pageBegin = Math.max(Constants.PAGE_NUM, pageEnd - 4);
+        return new long[]{pageBegin, pageEnd};
+    }
 }

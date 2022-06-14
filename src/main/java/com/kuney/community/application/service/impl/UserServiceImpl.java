@@ -8,7 +8,9 @@ import com.kuney.community.application.mapper.UserMapper;
 import com.kuney.community.application.service.LoginTicketService;
 import com.kuney.community.application.service.UserService;
 import com.kuney.community.util.CommunityUtils;
-import com.kuney.community.util.Constants;
+import com.kuney.community.util.Constants.Activation;
+import com.kuney.community.util.Constants.Login;
+import com.kuney.community.util.Constants.Register;
 import com.kuney.community.util.EncodeUtils;
 import com.kuney.community.util.ObjCheckUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,13 +67,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .eq(User::getUsername, user.getUsername())
                 .count();
         if (existUsername > 0) {
-            return 1;
+            return Register.USERNAME_EXIST;
         }
         Integer existEmail = this.lambdaQuery()
                 .eq(User::getEmail, user.getEmail())
                 .count();
         if (existEmail > 0) {
-            return 2;
+            return Register.EMAIL_REGISTERED;
         }
         user.setActivationCode(EncodeUtils.generateCode());
         user.setSalt(EncodeUtils.generateCode());
@@ -90,20 +92,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             communityUtils.sendSimpleMail(user.getEmail(), "激活账号", content);
         }, executor);
 
-        return 0;
+        return Register.SUCCESS;
     }
 
     @Override
     public int userActivation(Integer userId, String activationCode) {
         User user = this.getById(userId);
         if (ObjCheckUtils.isNull(user) || !user.getActivationCode().equals(activationCode)) {
-            return Constants.UserActivation.FAIL;
+            return Activation.FAIL;
         }
         if (user.getStatus() == 1) {
-            return Constants.UserActivation.REPEAT;
+            return Activation.REPEAT;
         }
         this.lambdaUpdate().set(User::getStatus, 1).eq(User::getId, userId).update();
-        return Constants.UserActivation.SUCCESS;
+        return Activation.SUCCESS;
     }
 
     @Override
@@ -112,12 +114,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         User user = this.getOne(Wrappers.<User>lambdaQuery().eq(User::getUsername, username));
         if (ObjCheckUtils.isNull(user)) {
-            result.put("resultCode", Constants.Login.USERNAME_ERROR);
+            result.put("resultCode", Login.USERNAME_ERROR);
+            return result;
+        }
+        if (user.getStatus() == 0) {
+            result.put("resultCode", Login.NOT_ACTIVE);
             return result;
         }
         String encodePassword = EncodeUtils.encodePassword(password, user.getSalt());
         if (!user.getPassword().equals(encodePassword)) {
-            result.put("resultCode", Constants.Login.PASSWORD_ERROR);
+            result.put("resultCode", Login.PASSWORD_ERROR);
             return result;
         }
 
@@ -143,7 +149,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Transactional
     @Override
     public void updatePassword(String newPassword, String ticket, User user) {
-        newPassword = EncodeUtils.encodePassword(newPassword,user.getSalt());
+        newPassword = EncodeUtils.encodePassword(newPassword, user.getSalt());
         this.lambdaUpdate()
                 .set(User::getPassword, newPassword)
                 .eq(User::getId, user.getId())

@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -28,8 +29,10 @@ public class DiscussPost implements Serializable {
 
     private Integer userId;
 
+    @NotBlank(message = "标题为空")
     private String title;
 
+    @NotBlank(message = "内容为空")
     private String content;
 
     /**

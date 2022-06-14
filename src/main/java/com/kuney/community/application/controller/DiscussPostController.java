@@ -1,16 +1,17 @@
 package com.kuney.community.application.controller;
 
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kuney.community.application.entity.DiscussPost;
 import com.kuney.community.application.service.DiscussPostService;
-import com.kuney.community.util.Constants;
+import com.kuney.community.util.HostHolder;
+import com.kuney.community.util.Result;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 /**
  * <p>
@@ -21,21 +22,32 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @since 2022-06-10
  */
 @Controller
+@RequestMapping("discuss-post")
 @AllArgsConstructor
-@Slf4j
 public class DiscussPostController {
 
     private DiscussPostService discussPostService;
+    private HostHolder hostHolder;
 
-    @GetMapping
-    public String getIndexPage(@RequestParam(required = false, defaultValue = "1") Integer pageNum, Model model) {
-        Page<DiscussPost> page = discussPostService.getIndexPage(pageNum);
-        long pageEnd = Math.min(page.getPages(), Math.max(5, pageNum + 1));
-        long pageBegin = Math.max(Constants.PAGE_NUM, pageEnd - 4);
-        model.addAttribute("page", page);
-        model.addAttribute("pageBegin", pageBegin);
-        model.addAttribute("pageEnd", pageEnd);
-        return "index";
+    @PostMapping
+    @ResponseBody
+    public Result publish(@Validated DiscussPost discussPost) {
+        if (hostHolder.getUser() == null) {
+            return Result.fail("请先登录！");
+        }
+        discussPostService.saveDiscussPost(discussPost);
+        return Result.success("发布成功！");
+    }
+
+    @GetMapping("{id}")
+    public String detail(@PathVariable Integer id, Model model,
+                         @RequestParam(required = false, defaultValue = "1") Integer pageNum) {
+        Map<String, Object> data = discussPostService.discussPostDetail(id, pageNum);
+        model.addAttribute("discussPost", data.get("discussPost"));
+        model.addAttribute("page", data.get("commentPage"));
+        model.addAttribute("pageBegin", data.get("pageBegin"));
+        model.addAttribute("pageEnd", data.get("pageEnd"));
+        return "site/discuss-detail";
     }
 }
 
