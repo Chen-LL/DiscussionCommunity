@@ -35,7 +35,7 @@ public class LoginTicketInterceptor implements HandlerInterceptor {
             LoginTicket loginTicket = loginTicketService
                     .getOne(Wrappers.<LoginTicket>lambdaQuery().eq(LoginTicket::getTicket, ticket));
             // 检查凭证是否有效
-            if(loginTicket != null && loginTicket.getStatus() == 0 && loginTicket.getExpired().isAfter(LocalDateTime.now())) {
+            if (loginTicket != null && loginTicket.getStatus() == 0 && loginTicket.getExpired().isAfter(LocalDateTime.now())) {
                 User user = userService.getOne(Wrappers.<User>lambdaQuery().eq(User::getId, loginTicket.getUserId()));
                 hostHolder.setUser(user);
             }
