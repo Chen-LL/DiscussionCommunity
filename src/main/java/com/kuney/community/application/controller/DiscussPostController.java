@@ -1,9 +1,9 @@
 package com.kuney.community.application.controller;
 
 
+import com.kuney.community.annotation.LoginRequired;
 import com.kuney.community.application.entity.DiscussPost;
 import com.kuney.community.application.service.DiscussPostService;
-import com.kuney.community.util.HostHolder;
 import com.kuney.community.util.Result;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -27,14 +27,11 @@ import java.util.Map;
 public class DiscussPostController {
 
     private DiscussPostService discussPostService;
-    private HostHolder hostHolder;
 
     @PostMapping
     @ResponseBody
+    @LoginRequired
     public Result publish(@Validated DiscussPost discussPost) {
-        if (hostHolder.getUser() == null) {
-            return Result.fail("请先登录！");
-        }
         discussPostService.saveDiscussPost(discussPost);
         return Result.success("发布成功！");
     }

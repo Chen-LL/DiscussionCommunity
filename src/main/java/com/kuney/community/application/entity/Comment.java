@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,11 +34,13 @@ public class Comment implements Serializable {
     /**
      * 评论所对应的实体类型：1-帖子，2-评论
      */
+    @NotNull(message = "实体类型为空")
     private Integer entityType;
 
     /**
      * 实体对应的id：帖子/评论
      */
+    @NotNull(message = "实体id为空")
     private Integer entityId;
 
     /**
@@ -44,6 +48,7 @@ public class Comment implements Serializable {
      */
     private Integer targetId;
 
+    @NotBlank(message = "评论内容为空")
     private String content;
 
     private Integer status;

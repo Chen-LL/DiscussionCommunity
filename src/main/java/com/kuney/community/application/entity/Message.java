@@ -1,11 +1,13 @@
 package com.kuney.community.application.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
-import java.time.LocalDateTime;
-import java.io.Serializable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * <p>
@@ -39,5 +41,12 @@ public class Message implements Serializable {
 
     private LocalDateTime createTime;
 
+    @TableField(exist = false)
+    private User from;
 
+    @TableField(exist = false)
+    private Integer unread; //会话未读数
+
+    @TableField(exist = false)
+    private Integer letters; //会话私信数
 }

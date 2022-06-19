@@ -29,4 +29,5 @@ public class HomeController {
         model.addAttribute("pageEnd", range[1]);
         return "index";
     }
+
 }

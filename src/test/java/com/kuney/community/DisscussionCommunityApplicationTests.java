@@ -5,6 +5,7 @@ import com.kuney.community.application.entity.Comment;
 import com.kuney.community.application.entity.DiscussPost;
 import com.kuney.community.application.service.DiscussPostService;
 import com.kuney.community.util.CommunityUtils;
+import com.kuney.community.util.EncodeUtils;
 import com.kuney.community.util.SensitiveWordFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -81,6 +82,12 @@ class DisscussionCommunityApplicationTests {
             log.info("----------------------------------");
         }
 
+    }
+
+    @Test
+    void encodePassword() {
+        String password = EncodeUtils.encodePassword("123", "a09113");
+        log.info("-------------{}", password);
     }
 
 }

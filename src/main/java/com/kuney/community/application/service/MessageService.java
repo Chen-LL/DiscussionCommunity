@@ -1,7 +1,9 @@
 package com.kuney.community.application.service;
 
-import com.kuney.community.application.entity.Message;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.kuney.community.application.entity.Message;
+
+import java.util.Map;
 
 /**
  * <p>
@@ -13,4 +15,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface MessageService extends IService<Message> {
 
+    Map<String, Object> getMessageIndex(int pageNum);
+
+
+    Map<String, Object> letterDetailPage(String conversationId, int pageNum);
+
+    void saveMessage(String username, String content);
 }

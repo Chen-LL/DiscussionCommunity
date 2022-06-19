@@ -2,4 +2,26 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.kuney.community.application.mapper.MessageMapper">
 
+    <select id="selectConversations" resultType="com.kuney.community.application.entity.Message">
+        SELECT id, from_id, to_id, conversation_id, content, `status`, create_time
+        FROM message
+        WHERE id in (
+            SELECT max(id) FROM message
+            WHERE from_id != 1
+            AND `status` != 2
+            AND (from_id = #{userId} OR to_id = #{userId})
+            GROUP BY conversation_id
+        )
+        ORDER BY id DESC
+        LIMIT #{current}, #{limit}
+    </select>
+
+    <select id="countConversation" resultType="java.lang.Integer">
+        SELECT count(t.conversation_id) FROM
+        (SELECT DISTINCT conversation_id FROM message
+        WHERE (from_id = #{userId} OR to_id = #{userId})
+        AND from_id != 1
+        AND `status` != 2
+        GROUP BY id DESC) AS t
+    </select>
 </mapper>
