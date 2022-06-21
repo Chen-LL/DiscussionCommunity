@@ -50,7 +50,7 @@
                         <input type="text" th:class="|form-control ${resultCode==2 ? 'is-invalid' : ''}|"
                                th:value="${param.code}" name="code"
                                id="verifycode" placeholder="请输入验证码!">
-                        <div class="invalid-feedback">
+                        <div class="invalid-feedback" th:text="${codeMsg}">
                             验证码不正确！
                         </div>
                     </div>

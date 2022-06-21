@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
  * @author kuneychen
  * @since 2022-06-10
  */
+@Deprecated
 @Service
 public class LoginTicketServiceImpl extends ServiceImpl<LoginTicketMapper, LoginTicket> implements LoginTicketService {
 

@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @author kuneychen
  * @since 2022-06-10
  */
+@Deprecated
 public interface LoginTicketService extends IService<LoginTicket> {
 
 }

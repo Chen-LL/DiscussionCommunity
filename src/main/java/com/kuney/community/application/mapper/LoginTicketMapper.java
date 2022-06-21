@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @author kuneychen
  * @since 2022-06-10
  */
+@Deprecated
 public interface LoginTicketMapper extends BaseMapper<LoginTicket> {
 
 }

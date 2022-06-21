@@ -2,10 +2,8 @@ package com.kuney.community.application.service.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.kuney.community.application.entity.LoginTicket;
 import com.kuney.community.application.entity.User;
 import com.kuney.community.application.mapper.UserMapper;
-import com.kuney.community.application.service.LoginTicketService;
 import com.kuney.community.application.service.UserService;
 import com.kuney.community.util.CommunityUtils;
 import com.kuney.community.util.Constants.Activation;
@@ -13,8 +11,9 @@ import com.kuney.community.util.Constants.Login;
 import com.kuney.community.util.Constants.Register;
 import com.kuney.community.util.EncodeUtils;
 import com.kuney.community.util.ObjCheckUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.kuney.community.util.RedisKeyUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.TemplateEngine;
@@ -26,6 +25,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -48,17 +48,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private CommunityUtils communityUtils;
     private TemplateEngine templateEngine;
     private ThreadPoolExecutor executor;
-    private LoginTicketService loginTicketService;
+    // private LoginTicketService loginTicketService;
+    private RedisTemplate redisTemplate;
 
-    @Autowired
-    public UserServiceImpl(CommunityUtils communityUtils,
-                           TemplateEngine templateEngine,
-                           ThreadPoolExecutor executor,
-                           LoginTicketService loginTicketService) {
+    public UserServiceImpl(CommunityUtils communityUtils, TemplateEngine templateEngine,
+                           ThreadPoolExecutor executor, RedisTemplate redisTemplate) {
         this.communityUtils = communityUtils;
         this.templateEngine = templateEngine;
         this.executor = executor;
-        this.loginTicketService = loginTicketService;
+        this.redisTemplate = redisTemplate;
     }
 
     @Override
@@ -127,22 +125,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return result;
         }
 
-        LoginTicket ticket = new LoginTicket();
+        /*LoginTicket ticket = new LoginTicket();
         ticket.setUserId(user.getId());
         ticket.setExpired(LocalDateTime.now().plusSeconds(expireSeconds));
         ticket.setTicket(EncodeUtils.generateTicket(ticket.getUserId()));
-        loginTicketService.save(ticket);
-
-        result.put("ticket", ticket.getTicket());
+        loginTicketService.save(ticket);*/
+        String ticket = EncodeUtils.generateTicket(user.getId());
+        redisTemplate.opsForValue().set(RedisKeyUtils.getLoginTicketKey(ticket), user.getId(), expireSeconds, TimeUnit.SECONDS);
+        result.put("ticket", ticket);
         return result;
     }
 
     @Override
     public void userLogout(String ticket) {
-        loginTicketService.lambdaUpdate()
-                .set(LoginTicket::getStatus, 1)
-                .eq(LoginTicket::getTicket, ticket)
-                .update();
+        // loginTicketService.lambdaUpdate()
+        //         .set(LoginTicket::getStatus, 1)
+        //         .eq(LoginTicket::getTicket, ticket)
+        //         .update();
+        redisTemplate.delete(RedisKeyUtils.getLoginTicketKey(ticket));
     }
 
 

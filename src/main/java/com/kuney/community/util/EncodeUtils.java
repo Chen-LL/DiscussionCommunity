@@ -31,6 +31,10 @@ public class EncodeUtils {
         return UUID.randomUUID().toString().replaceAll("-", "").substring(0, 6);
     }
 
+    public static String generateUUID() {
+        return UUID.randomUUID().toString().replaceAll("-", "");
+    }
+
     /**
      * 生成登录凭证
      *

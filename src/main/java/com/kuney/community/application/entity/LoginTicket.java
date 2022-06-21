@@ -2,10 +2,11 @@ package com.kuney.community.application.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import java.time.LocalDateTime;
-import java.io.Serializable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * <p>
@@ -15,6 +16,7 @@ import lombok.EqualsAndHashCode;
  * @author kuneychen
  * @since 2022-06-10
  */
+@Deprecated
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class LoginTicket implements Serializable {

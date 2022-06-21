@@ -11,6 +11,8 @@ public class RedisKeyUtils {
     private final static String LIKE_USER_PREFIX = "like:user:";
     private final static String FOLLOWEE_PREFIX = "followee:";
     private final static String FOLLOWER_PREFIX = "follower:";
+    private final static String LOGIN_CODE_PREFIX = "login:code:";
+    private final static String LOGIN_TICKET_PREFIX = "login:ticket:";
 
     /**
      *
@@ -49,5 +51,13 @@ public class RedisKeyUtils {
      */
     public static String getFollowerKey(int entityType, int entityId) {
         return FOLLOWER_PREFIX + entityType + DELIMITER + entityId;
+    }
+
+    public static String getLoginCodeKey(String owner) {
+        return  LOGIN_CODE_PREFIX + owner;
+    }
+
+    public static String getLoginTicketKey(String ticket) {
+        return  LOGIN_TICKET_PREFIX + ticket;
     }
 }

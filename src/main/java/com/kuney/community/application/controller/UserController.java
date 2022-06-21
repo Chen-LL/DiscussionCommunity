@@ -13,6 +13,7 @@ import com.kuney.community.util.Constants.Register;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
@@ -30,6 +31,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -57,19 +59,17 @@ public class UserController {
     private HostHolder hostHolder;
     private LikeService likeService;
     private FollowService followService;
+    private RedisTemplate redisTemplate;
 
-    public UserController(UserService userService,
-                          Producer kaptchaProducer,
-                          CommunityUtils communityUtils,
-                          HostHolder hostHolder,
-                          LikeService likeService,
-                          FollowService followService) {
+    public UserController(UserService userService, Producer kaptchaProducer, CommunityUtils communityUtils, HostHolder hostHolder,
+                          LikeService likeService, FollowService followService, RedisTemplate redisTemplate) {
         this.userService = userService;
         this.kaptchaProducer = kaptchaProducer;
         this.communityUtils = communityUtils;
         this.hostHolder = hostHolder;
         this.likeService = likeService;
         this.followService = followService;
+        this.redisTemplate = redisTemplate;
     }
 
     @GetMapping("register")
@@ -111,10 +111,17 @@ public class UserController {
 
     @PostMapping("login")
     public String login(String username, String password, String code, Boolean rememberMe,
-                        Model model, HttpSession session, HttpServletResponse response) {
-        String loginCode = (String) session.getAttribute("loginCode");
-        if (ObjCheckUtils.isBlank(loginCode) || !loginCode.equalsIgnoreCase(code)) {
+                        Model model, HttpServletResponse response, HttpSession session,
+                        @CookieValue("codeOwner") String codeOwner) {
+        if (ObjCheckUtils.isBlank(codeOwner)) {
             model.addAttribute("resultCode", Login.CODE_ERROR);
+            model.addAttribute("codeMsg", "验证码已失效！");
+            return "site/login";
+        }
+        Object loginCode = redisTemplate.opsForValue().get(RedisKeyUtils.getLoginCodeKey(codeOwner));
+        if (ObjCheckUtils.isNull(loginCode) || !((String) loginCode).equalsIgnoreCase(code)) {
+            model.addAttribute("resultCode", Login.CODE_ERROR);
+            model.addAttribute("codeMsg", "验证码不正确！");
             return "site/login";
         }
         int expireSeconds = rememberMe != null && rememberMe ?
@@ -138,12 +145,17 @@ public class UserController {
     }
 
     @GetMapping("code")
-    public void getLoginCode(HttpSession session, HttpServletResponse response) {
+    public void getLoginCode(HttpServletResponse response, HttpSession session) {
         // 生成验证码
         String code = kaptchaProducer.createText();
         // 验证码图片
         BufferedImage image = kaptchaProducer.createImage(code);
-        session.setAttribute("loginCode", code);
+        // session.setAttribute("loginCode", code);
+        String codeOwner = EncodeUtils.generateUUID();
+        redisTemplate.opsForValue().set(RedisKeyUtils.getLoginCodeKey(codeOwner), code, 60, TimeUnit.SECONDS);
+        Cookie cookie = new Cookie("codeOwner", codeOwner);
+        cookie.setPath(session.getServletContext().getContextPath());
+        response.addCookie(cookie);
         response.setContentType("image/png");
         try {
             ImageIO.write(image, "png", response.getOutputStream());
