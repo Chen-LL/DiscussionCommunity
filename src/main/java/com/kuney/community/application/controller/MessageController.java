@@ -38,6 +38,7 @@ public class MessageController {
         model.addAttribute("pageBegin", data.get("pageBegin"));
         model.addAttribute("pageEnd", data.get("pageEnd"));
         model.addAttribute("unreadCount", data.get("unreadCount"));
+        model.addAttribute("path", "/message");
         return "site/letter";
     }
 
@@ -51,7 +52,7 @@ public class MessageController {
         model.addAttribute("pageBegin", result.get("pageBegin"));
         model.addAttribute("pageEnd", result.get("pageEnd"));
         model.addAttribute("target", result.get("target"));
-        model.addAttribute("conversationId", conversationId);
+        model.addAttribute("path", "/message/" + conversationId);
         return "site/letter-detail";
     }
 

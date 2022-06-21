@@ -1,0 +1,41 @@
+package com.kuney.community.application.controller;
+
+import com.kuney.community.annotation.LoginRequired;
+import com.kuney.community.application.entity.User;
+import com.kuney.community.application.service.LikeService;
+import com.kuney.community.util.HostHolder;
+import com.kuney.community.util.Result;
+import lombok.AllArgsConstructor;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * @author kuneychen
+ * @since 2022/6/19 22:05
+ */
+@RestController
+@RequestMapping("like")
+@AllArgsConstructor
+public class LikeController {
+
+    private LikeService likeService;
+    private HostHolder hostHolder;
+
+    @PostMapping
+    @LoginRequired
+    public Result likeEntity(int entityType, int entityId, int toUserId) {
+        User user = hostHolder.getUser();
+        likeService.like(entityType, entityId, user.getId(), toUserId);
+        long likeCount = likeService.likeCount(entityType, entityId);
+        int likeStatus = likeService.getLikeStatus(entityType, entityId, user.getId());
+        Map<String, Object> data = new HashMap<>();
+        data.put("likeCount", likeCount);
+        data.put("likeStatus", likeStatus);
+        return Result.data(data);
+    }
+
+}

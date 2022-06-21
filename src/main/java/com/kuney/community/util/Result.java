@@ -19,6 +19,13 @@ public class Result {
         return result;
     }
 
+    public static Result success() {
+        Result result = new Result();
+        result.setCode(200);
+        result.setMsg("success");
+        return result;
+    }
+
     public static Result fail(String msg) {
         Result result = new Result();
         result.setCode(400);

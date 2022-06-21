@@ -38,7 +38,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
-    @Value("${user.default.headUrl}")
+    @Value("${user.image.default}")
     private String headUrl;
     @Value("${server.servlet.context-path}")
     private String contextPath;

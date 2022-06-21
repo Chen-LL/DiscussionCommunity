@@ -53,4 +53,10 @@ public class DiscussPost implements Serializable {
 
     @TableField(exist = false)
     private User user;
+
+    @TableField(exist = false)
+    private long likeCount;
+
+    @TableField(exist = false)
+    private int likeStatus;
 }

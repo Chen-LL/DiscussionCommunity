@@ -8,6 +8,7 @@ import com.kuney.community.application.entity.User;
 import com.kuney.community.application.mapper.DiscussPostMapper;
 import com.kuney.community.application.service.CommentService;
 import com.kuney.community.application.service.DiscussPostService;
+import com.kuney.community.application.service.LikeService;
 import com.kuney.community.application.service.UserService;
 import com.kuney.community.exception.CustomException;
 import com.kuney.community.util.*;
@@ -39,6 +40,7 @@ public class DiscussPostServiceImpl extends ServiceImpl<DiscussPostMapper, Discu
     private SensitiveWordFilter sensitiveWordFilter;
     private HostHolder hostHolder;
     private CommentService commentService;
+    private LikeService likeService;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -52,7 +54,10 @@ public class DiscussPostServiceImpl extends ServiceImpl<DiscussPostMapper, Discu
             Set<Integer> userIds = discussPosts.stream().map(DiscussPost::getUserId).collect(Collectors.toSet());
             List<User> users = userService.listByIds(userIds);
             Map<Integer, User> userMap = users.stream().collect(Collectors.toMap(User::getId, user -> user));
-            discussPosts.forEach(discussPost -> discussPost.setUser(userMap.get(discussPost.getUserId())));
+            discussPosts.forEach(discussPost -> {
+                discussPost.setUser(userMap.get(discussPost.getUserId()));
+                discussPost.setLikeCount(likeService.likeCount(EntityType.POST, discussPost.getId()));
+            });
         }
         return page;
     }
@@ -77,6 +82,11 @@ public class DiscussPostServiceImpl extends ServiceImpl<DiscussPostMapper, Discu
             throw new CustomException(404, "帖子不存在");
         }
         discussPost.setUser(userService.getById(discussPost.getUserId()));
+        discussPost.setLikeCount(likeService.likeCount(EntityType.POST, id));
+        User user = hostHolder.getUser();
+        if (user != null) {
+            discussPost.setLikeStatus(likeService.getLikeStatus(EntityType.POST, id, user.getId()));
+        }
         Page<Comment> commentPage = pageComment(pageNum, discussPost.getId());
         long[] range = PageUtils.getPageRange(commentPage.getPages(), pageNum);
 
@@ -94,7 +104,7 @@ public class DiscussPostServiceImpl extends ServiceImpl<DiscussPostMapper, Discu
      * @param discussPostId 帖子id
      * @return
      */
-    private Page<Comment> pageComment1(Integer pageNum, Integer discussPostId) {
+    private Page<Comment> pageComment(Integer pageNum, Integer discussPostId) {
         Page<Comment> commentPage = commentService.lambdaQuery()
                 .eq(Comment::getEntityType, EntityType.POST)
                 .eq(Comment::getEntityId, discussPostId)
@@ -103,6 +113,7 @@ public class DiscussPostServiceImpl extends ServiceImpl<DiscussPostMapper, Discu
 
         // 回帖列表：对帖子的评论
         List<Comment> comments = commentPage.getRecords();
+        User user = hostHolder.getUser();
         for (Comment comment : comments) {
             // 回复列表：对评论的评论
             List<Comment> replyList = commentService.lambdaQuery()
@@ -112,10 +123,19 @@ public class DiscussPostServiceImpl extends ServiceImpl<DiscussPostMapper, Discu
                     .list();
             comment.setUser(userService.getById(comment.getUserId()));
             comment.setReplyList(replyList);
+            comment.setLikeCount(likeService.likeCount(EntityType.COMMENT, comment.getId()));
+            if (user != null) {
+                comment.setLikeStatus(likeService.getLikeStatus(EntityType.COMMENT, comment.getId(), user.getId()));
+            }
+
             for (Comment reply : replyList) {
                 reply.setUser(userService.getById(reply.getUserId()));
                 if (reply.getTargetId() != 0) {
                     reply.setTargetUser(userService.getById(reply.getTargetId()));
+                }
+                reply.setLikeCount(likeService.likeCount(EntityType.COMMENT, reply.getId()));
+                if (user != null) {
+                    reply.setLikeStatus(likeService.getLikeStatus(EntityType.COMMENT, reply.getId(), user.getId()));
                 }
             }
         }
@@ -129,7 +149,7 @@ public class DiscussPostServiceImpl extends ServiceImpl<DiscussPostMapper, Discu
      * @param discussPostId 帖子id
      * @return
      */
-    private Page<Comment> pageComment(Integer pageNum, Integer discussPostId) {
+    private Page<Comment> pageComment2(Integer pageNum, Integer discussPostId) {
 
         @AllArgsConstructor
         @EqualsAndHashCode
@@ -146,11 +166,16 @@ public class DiscussPostServiceImpl extends ServiceImpl<DiscussPostMapper, Discu
 
         // 回帖列表：对帖子的评论
         List<Comment> comments = commentPage.getRecords();
+        User user = hostHolder.getUser();
         if (ObjCheckUtils.nonEmpty(comments)) {
             List<Integer> commentIds = new ArrayList<>();
             for (Comment comment : comments) {
                 commentIds.add(comment.getId());
                 comment.setUser(userService.getById(comment.getUserId()));
+                comment.setLikeCount(likeService.likeCount(EntityType.COMMENT, comment.getId()));
+                if (user != null) {
+                    comment.setLikeStatus(likeService.getLikeStatus(EntityType.COMMENT, comment.getId(), user.getId()));
+                }
             }
             // 回帖列表对应所有回复
             List<Comment> allReplyList = commentService.lambdaQuery()
@@ -170,6 +195,11 @@ public class DiscussPostServiceImpl extends ServiceImpl<DiscussPostMapper, Discu
                     reply.setUser(userService.getById(reply.getUserId()));
                     if (reply.getTargetId() != 0) {
                         reply.setTargetUser(userService.getById(reply.getTargetId()));
+                    }
+
+                    reply.setLikeCount(likeService.likeCount(EntityType.COMMENT, reply.getId()));
+                    if (user != null) {
+                        reply.setLikeStatus(likeService.getLikeStatus(EntityType.COMMENT, reply.getId(), user.getId()));
                     }
                 }
                 for (Comment comment : comments) {

@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @since 2022/6/13 21:10
  */
 @Controller
+@RequestMapping("index")
 @AllArgsConstructor
 public class HomeController {
 
@@ -27,6 +29,7 @@ public class HomeController {
         model.addAttribute("page", page);
         model.addAttribute("pageBegin", range[0]);
         model.addAttribute("pageEnd", range[1]);
+        model.addAttribute("path", "/index");
         return "index";
     }
 

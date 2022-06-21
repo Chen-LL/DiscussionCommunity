@@ -61,4 +61,10 @@ public class Comment implements Serializable {
     @TableField(exist = false)
     private User user, targetUser;
 
+    @TableField(exist = false)
+    private long likeCount;
+
+    @TableField(exist = false)
+    private int likeStatus;
+
 }

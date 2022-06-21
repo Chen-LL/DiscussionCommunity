@@ -51,5 +51,14 @@ public interface Constants {
     interface EntityType {
         int POST = 1; // 帖子
         int COMMENT = 2; // 评论
+        int USER = 3; // 用户
+    }
+
+    /**
+     * 点赞状态
+     */
+    interface LikeStatus {
+        int UNLIKE = 0;
+        int LIKED = 1;
     }
 }

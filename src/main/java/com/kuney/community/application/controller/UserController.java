@@ -4,6 +4,8 @@ package com.kuney.community.application.controller;
 import com.google.code.kaptcha.Producer;
 import com.kuney.community.annotation.LoginRequired;
 import com.kuney.community.application.entity.User;
+import com.kuney.community.application.service.FollowService;
+import com.kuney.community.application.service.LikeService;
 import com.kuney.community.application.service.UserService;
 import com.kuney.community.util.*;
 import com.kuney.community.util.Constants.Login;
@@ -53,15 +55,21 @@ public class UserController {
     private Producer kaptchaProducer;
     private CommunityUtils communityUtils;
     private HostHolder hostHolder;
+    private LikeService likeService;
+    private FollowService followService;
 
     public UserController(UserService userService,
                           Producer kaptchaProducer,
                           CommunityUtils communityUtils,
-                          HostHolder hostHolder) {
+                          HostHolder hostHolder,
+                          LikeService likeService,
+                          FollowService followService) {
         this.userService = userService;
         this.kaptchaProducer = kaptchaProducer;
         this.communityUtils = communityUtils;
         this.hostHolder = hostHolder;
+        this.likeService = likeService;
+        this.followService = followService;
     }
 
     @GetMapping("register")
@@ -117,7 +125,7 @@ public class UserController {
             cookie.setMaxAge(expireSeconds);
             cookie.setPath(session.getServletContext().getContextPath());
             response.addCookie(cookie);
-            return "redirect:/";
+            return "redirect:/index";
         }
         model.addAttribute("resultCode", map.get("resultCode"));
         return "site/login";
@@ -126,7 +134,7 @@ public class UserController {
     @GetMapping("logout")
     public String logout(@CookieValue("ticket") String ticket) {
         userService.userLogout(ticket);
-        return "redirect:/";
+        return "redirect:/index";
     }
 
     @GetMapping("code")
@@ -206,6 +214,25 @@ public class UserController {
         model.addAttribute("msg", "密码修改成功，请重新登录！");
         model.addAttribute("target", "/user/login");
         return "site/operate-result";
+    }
+
+    @GetMapping("profile/{userId}")
+    public String profile(@PathVariable int userId, Model model) {
+        User user = userService.getById(userId);
+        int likeCount = likeService.getUserLikeCount(userId);
+        long followeeCount = followService.followeeCount(userId, Constants.EntityType.USER);
+        long followerCount = followService.followerCount(Constants.EntityType.USER, userId);
+        User current = hostHolder.getUser();
+        if (current != null) {
+            boolean isFollowed = followService.isFollowed(current.getId(), Constants.EntityType.USER, userId);
+            model.addAttribute("isFollowed", isFollowed);
+        }
+
+        model.addAttribute("user", user);
+        model.addAttribute("likeCount", likeCount);
+        model.addAttribute("followeeCount", followeeCount);
+        model.addAttribute("followerCount", followerCount);
+        return "site/profile";
     }
 }
 

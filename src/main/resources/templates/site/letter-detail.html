@@ -78,7 +78,7 @@
             <!-- 私信列表 -->
             <ul class="list-unstyled mt-4">
                 <li class="media pb-3 pt-3 mb-2" th:each="message : ${page.records}">
-                    <a href="profile.html">
+                    <a th:href="@{/user/profile/{userId}(userId=${message.from.id})}">
                         <img th:src="${message.from.headerUrl}" class="mr-4 rounded-circle user-header" alt="用户头像">
                     </a>
                     <div class="toast show d-lg-block" role="alert" aria-live="assertive" aria-atomic="true">
@@ -98,32 +98,7 @@
                     </div>
                 </li>
             </ul>
-            <!-- 分页 -->
-            <nav class="mt-5" th:if="${page.pages > 1}">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item"><a class="page-link"
-                                             th:href="@{/message/{conversationId}(conversationId=${conversationId}, pageNum=1)}">首页</a>
-                    </li>
-                    <li th:class="|page-item ${page.current == 1 ? 'disabled' : ''}|">
-                        <a class="page-link"
-                           th:href="@{/message/{conversationId}(conversationId=${conversationId}, pageNum=${page.current-1})}">上一页</a>
-                    </li>
-                    <li th:each="no : ${#numbers.sequence(pageBegin, pageEnd)}"
-                        th:class="|page-item ${page.current == no  ? 'active' : ''}|"
-                    >
-                        <a class="page-link"
-                           th:href="@{/message/{conversationId}(conversationId=${conversationId}, pageNum=${no})}"
-                           th:text="${no}">1</a>
-                    </li>
-                    <li th:class="|page-item ${page.current == page.pages ? 'disabled' : ''}|">
-                        <a class="page-link"
-                           th:href="@{/message/{conversationId}(conversationId=${conversationId}, pageNum=${page.current+1})}">下一页</a>
-                    </li>
-                    <li class="page-item"><a class="page-link"
-                                             th:href="@{/message/{conversationId}(conversationId=${conversationId}, pageNum=${page.pages})}">末页</a>
-                    </li>
-                </ul>
-            </nav>
+            <div th:replace="commons::pageNav"></div>
         </div>
     </div>
 

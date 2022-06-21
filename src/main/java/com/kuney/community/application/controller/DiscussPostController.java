@@ -44,6 +44,7 @@ public class DiscussPostController {
         model.addAttribute("page", data.get("commentPage"));
         model.addAttribute("pageBegin", data.get("pageBegin"));
         model.addAttribute("pageEnd", data.get("pageEnd"));
+        model.addAttribute("path", "/discuss-post/" + id);
         return "site/discuss-detail";
     }
 }

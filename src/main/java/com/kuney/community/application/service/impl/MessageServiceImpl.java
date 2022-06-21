@@ -144,11 +144,11 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
     private User getLetterTarget(String conversationId) {
         String[] ids = conversationId.split("_");
         int id0 = Integer.parseInt(ids[0]), id1 = Integer.parseInt(ids[1]);
-        int userId = hostHolder.getUser().getId();
-        if (userId == id0) {
-            userId = id1;
+        User user = hostHolder.getUser();
+        if (id0 != user.getId()) {
+            return userService.getById(id0);
         }
-        return userService.getById(userId);
+        return userService.getById(id1);
     }
 
 }
