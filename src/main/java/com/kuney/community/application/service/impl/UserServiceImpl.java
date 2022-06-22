@@ -95,7 +95,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public int userActivation(Integer userId, String activationCode) {
-        User user = this.getById(userId);
+        User user = this.getUser(userId);
         if (ObjCheckUtils.isNull(user) || !user.getActivationCode().equals(activationCode)) {
             return Activation.FAIL;
         }

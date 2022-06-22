@@ -41,7 +41,7 @@ public class LoginTicketInterceptor implements HandlerInterceptor {
             // }
             Integer userId = (Integer) redisTemplate.opsForValue().get(RedisKeyUtils.getLoginTicketKey(ticket));
             if (ObjCheckUtils.nonNull(userId)) {
-                User user = userService.getById(userId);
+                User user = userService.getUser(userId);
                 hostHolder.setUser(user);
             }
         }

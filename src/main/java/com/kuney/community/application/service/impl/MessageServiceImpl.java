@@ -92,7 +92,7 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
                 .page(new Page<>(pageNum, PAGE_SIZE));
         List<Message> letters = page.getRecords();
         for (Message message : letters) {
-            message.setFrom(userService.getById(message.getFromId()));
+            message.setFrom(userService.getUser(message.getFromId()));
         }
 
         // 设置已读
@@ -146,9 +146,9 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
         int id0 = Integer.parseInt(ids[0]), id1 = Integer.parseInt(ids[1]);
         User user = hostHolder.getUser();
         if (id0 != user.getId()) {
-            return userService.getById(id0);
+            return userService.getUser(id0);
         }
-        return userService.getById(id1);
+        return userService.getUser(id1);
     }
 
 }

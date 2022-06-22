@@ -81,7 +81,7 @@ public class DiscussPostServiceImpl extends ServiceImpl<DiscussPostMapper, Discu
         if (ObjCheckUtils.isNull(discussPost)) {
             throw new CustomException(404, "帖子不存在");
         }
-        discussPost.setUser(userService.getById(discussPost.getUserId()));
+        discussPost.setUser(userService.getUser(discussPost.getUserId()));
         discussPost.setLikeCount(likeService.likeCount(EntityType.POST, id));
         User user = hostHolder.getUser();
         if (user != null) {
@@ -121,7 +121,7 @@ public class DiscussPostServiceImpl extends ServiceImpl<DiscussPostMapper, Discu
                     .eq(Comment::getEntityId, comment.getId())
                     .orderByAsc(Comment::getCreateTime)
                     .list();
-            comment.setUser(userService.getById(comment.getUserId()));
+            comment.setUser(userService.getUser(comment.getUserId()));
             comment.setReplyList(replyList);
             comment.setLikeCount(likeService.likeCount(EntityType.COMMENT, comment.getId()));
             if (user != null) {
@@ -129,9 +129,9 @@ public class DiscussPostServiceImpl extends ServiceImpl<DiscussPostMapper, Discu
             }
 
             for (Comment reply : replyList) {
-                reply.setUser(userService.getById(reply.getUserId()));
+                reply.setUser(userService.getUser(reply.getUserId()));
                 if (reply.getTargetId() != 0) {
-                    reply.setTargetUser(userService.getById(reply.getTargetId()));
+                    reply.setTargetUser(userService.getUser(reply.getTargetId()));
                 }
                 reply.setLikeCount(likeService.likeCount(EntityType.COMMENT, reply.getId()));
                 if (user != null) {
@@ -171,7 +171,7 @@ public class DiscussPostServiceImpl extends ServiceImpl<DiscussPostMapper, Discu
             List<Integer> commentIds = new ArrayList<>();
             for (Comment comment : comments) {
                 commentIds.add(comment.getId());
-                comment.setUser(userService.getById(comment.getUserId()));
+                comment.setUser(userService.getUser(comment.getUserId()));
                 comment.setLikeCount(likeService.likeCount(EntityType.COMMENT, comment.getId()));
                 if (user != null) {
                     comment.setLikeStatus(likeService.getLikeStatus(EntityType.COMMENT, comment.getId(), user.getId()));
@@ -192,9 +192,9 @@ public class DiscussPostServiceImpl extends ServiceImpl<DiscussPostMapper, Discu
                         map.put(key, new ArrayList<>());
                     }
                     map.get(key).add(reply);
-                    reply.setUser(userService.getById(reply.getUserId()));
+                    reply.setUser(userService.getUser(reply.getUserId()));
                     if (reply.getTargetId() != 0) {
-                        reply.setTargetUser(userService.getById(reply.getTargetId()));
+                        reply.setTargetUser(userService.getUser(reply.getTargetId()));
                     }
 
                     reply.setLikeCount(likeService.likeCount(EntityType.COMMENT, reply.getId()));

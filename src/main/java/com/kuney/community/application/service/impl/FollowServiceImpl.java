@@ -101,7 +101,7 @@ public class FollowServiceImpl implements FollowService {
         User loginUser = hostHolder.getUser();
         for (Integer targetId : targetIds) {
             HashMap<String, Object> item = new HashMap<>();
-            User user = userService.getById(targetId);
+            User user = userService.getUser(targetId);
             item.put("user", user);
 
             Double time = redisTemplate.opsForZSet().score(followeeKey, targetId);

@@ -53,7 +53,7 @@ public class FollowController {
     public String followeeList(@PathVariable int userId, Model model,
                                @RequestParam(required = false, defaultValue = "1") int pageNum) {
         Page<Map<String, Object>> page = followService.followeePage(userId, pageNum);
-        User user = userService.getById(userId);
+        User user = userService.getUser(userId);
         long[] range = PageUtils.getPageRange(page.getPages(), pageNum);
 
         model.addAttribute("page", page);
@@ -68,7 +68,7 @@ public class FollowController {
     public String followerList(@PathVariable int userId, Model model,
                                @RequestParam(required = false, defaultValue = "1") int pageNum) {
         Page<Map<String, Object>> page = followService.followerPage(userId, pageNum);
-        User user = userService.getById(userId);
+        User user = userService.getUser(userId);
         long[] range = PageUtils.getPageRange(page.getPages(), pageNum);
 
         model.addAttribute("page", page);

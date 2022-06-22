@@ -230,7 +230,7 @@ public class UserController {
 
     @GetMapping("profile/{userId}")
     public String profile(@PathVariable int userId, Model model) {
-        User user = userService.getById(userId);
+        User user = userService.getUser(userId);
         int likeCount = likeService.getUserLikeCount(userId);
         long followeeCount = followService.followeeCount(userId, Constants.EntityType.USER);
         long followerCount = followService.followerCount(Constants.EntityType.USER, userId);
