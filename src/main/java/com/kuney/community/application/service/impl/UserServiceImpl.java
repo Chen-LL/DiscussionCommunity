@@ -155,5 +155,33 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .eq(User::getId, user.getId())
                 .update();
         this.userLogout(ticket);
+        this.clearCache(user.getId());
     }
+
+    @Override
+    public User getUser(int userId) {
+        User user = getCache(userId);
+        if (ObjCheckUtils.isNull(user)) {
+            user = initCache(userId);
+        }
+        return user;
+    }
+
+    private User getCache(int userId) {
+        String key = RedisKeyUtils.getUserKey(userId);
+        return (User) redisTemplate.opsForValue().get(key);
+    }
+
+    private User initCache(int userId) {
+        User user = this.getById(userId);
+        String key = RedisKeyUtils.getUserKey(userId);
+        redisTemplate.opsForValue().set(key, user, 1, TimeUnit.HOURS);
+        return user;
+    }
+
+    private void clearCache(int userId) {
+        String key = RedisKeyUtils.getUserKey(userId);
+        redisTemplate.delete(key);
+    }
+
 }

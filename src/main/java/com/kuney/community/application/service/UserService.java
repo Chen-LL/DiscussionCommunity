@@ -42,4 +42,6 @@ public interface UserService extends IService<User> {
     void userLogout(String ticket);
 
     void updatePassword(String newPassword, String ticket, User user);
+
+    User getUser(int id);
 }

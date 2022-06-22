@@ -82,7 +82,7 @@ public class UserController {
         int result = userService.userRegister(user);
         if (result == Register.SUCCESS) {
             model.addAttribute("msg", "注册成功！我们已经向您发送了一份激活邮件，请尽快激活！");
-            model.addAttribute("target", "/");
+            model.addAttribute("target", "/index");
             return "site/operate-result";
         }
         model.addAttribute("resultCode", result);
@@ -100,7 +100,7 @@ public class UserController {
         } else {
             model.addAttribute("msg", "激活成功，您的账号已经可以正常使用！");
         }
-        model.addAttribute("target", "/");
+        model.addAttribute("target", "/index");
         return "site/operate-result";
     }
 
@@ -191,7 +191,7 @@ public class UserController {
                 .eq(User::getId, hostHolder.getUser().getId())
                 .update();
         model.addAttribute("msg", "头像上传成功！");
-        model.addAttribute("target", "/");
+        model.addAttribute("target", "/index");
         return "site/operate-result";
     }
 

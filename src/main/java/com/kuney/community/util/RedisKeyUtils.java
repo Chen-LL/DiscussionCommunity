@@ -13,6 +13,7 @@ public class RedisKeyUtils {
     private final static String FOLLOWER_PREFIX = "follower:";
     private final static String LOGIN_CODE_PREFIX = "login:code:";
     private final static String LOGIN_TICKET_PREFIX = "login:ticket:";
+    private final static String USER_PREFIX = "user:";
 
     /**
      *
@@ -59,5 +60,9 @@ public class RedisKeyUtils {
 
     public static String getLoginTicketKey(String ticket) {
         return  LOGIN_TICKET_PREFIX + ticket;
+    }
+
+    public static String getUserKey(int userId) {
+        return USER_PREFIX + userId;
     }
 }
