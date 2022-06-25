@@ -10,6 +10,7 @@ import com.kuney.community.util.HostHolder;
 import com.kuney.community.util.SensitiveWordFilter;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.HtmlUtils;
 
 import java.time.LocalDateTime;
@@ -30,6 +31,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     private SensitiveWordFilter sensitiveWordFilter;
     private HostHolder hostHolder;
 
+    @Transactional
     @Override
     public void addComment(Comment comment) {
         comment.setContent(HtmlUtils.htmlEscape(comment.getContent()));

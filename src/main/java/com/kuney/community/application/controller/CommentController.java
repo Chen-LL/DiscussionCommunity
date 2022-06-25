@@ -3,7 +3,13 @@ package com.kuney.community.application.controller;
 
 import com.kuney.community.annotation.LoginRequired;
 import com.kuney.community.application.entity.Comment;
+import com.kuney.community.application.entity.DiscussPost;
 import com.kuney.community.application.service.CommentService;
+import com.kuney.community.application.service.DiscussPostService;
+import com.kuney.community.event.Event;
+import com.kuney.community.event.EventProducer;
+import com.kuney.community.util.Constants.KafkaTopic;
+import com.kuney.community.util.Constants.EntityType;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,12 +30,29 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class CommentController {
 
     private CommentService commentService;
+    private EventProducer eventProducer;
+    private DiscussPostService discussPostService;
 
     @LoginRequired
-    @PostMapping("{discussPostId}")
-    public String addComment(@PathVariable int discussPostId, Comment comment) {
+    @PostMapping("{postId}")
+    public String addComment(@PathVariable int postId, Comment comment) {
         commentService.addComment(comment);
-        return "redirect:/discuss-post/" + discussPostId;
+
+        Event event = new Event();
+        event.setTopic(KafkaTopic.COMMENT);
+        event.setUserId(comment.getUserId());
+        event.setEntityType(comment.getEntityType());
+        event.setEntityId(comment.getEntityId());
+        event.setData("postId", postId);
+        if (EntityType.POST == comment.getEntityType()) {
+            DiscussPost discussPost = discussPostService.getById(postId);
+            event.setEntityUserId(discussPost.getUserId());
+        } else if (EntityType.COMMENT == comment.getEntityType()) {
+            Comment target = commentService.getById(comment.getEntityId());
+            event.setEntityUserId(target.getUserId());
+        }
+        eventProducer.sendMessage(event);
+        return "redirect:/discuss-post/" + postId;
     }
 
 }

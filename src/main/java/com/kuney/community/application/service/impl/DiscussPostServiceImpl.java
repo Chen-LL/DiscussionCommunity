@@ -101,13 +101,13 @@ public class DiscussPostServiceImpl extends ServiceImpl<DiscussPostMapper, Discu
      * 获取帖子的评论列表（版本1）
      *
      * @param pageNum       当前页
-     * @param discussPostId 帖子id
+     * @param postId 帖子id
      * @return
      */
-    private Page<Comment> pageComment(Integer pageNum, Integer discussPostId) {
+    private Page<Comment> pageComment(Integer pageNum, Integer postId) {
         Page<Comment> commentPage = commentService.lambdaQuery()
                 .eq(Comment::getEntityType, EntityType.POST)
-                .eq(Comment::getEntityId, discussPostId)
+                .eq(Comment::getEntityId, postId)
                 .orderByAsc(Comment::getCreateTime)
                 .page(new Page<>(pageNum, Constants.PAGE_SIZE));
 
@@ -146,10 +146,10 @@ public class DiscussPostServiceImpl extends ServiceImpl<DiscussPostMapper, Discu
      * 获取帖子的评论列表（版本2）
      * 将循环查询数据库优化为查询一遍数据库，在内存中组装评论间的关系
      * @param pageNum 当前页
-     * @param discussPostId 帖子id
+     * @param postId 帖子id
      * @return
      */
-    private Page<Comment> pageComment2(Integer pageNum, Integer discussPostId) {
+    private Page<Comment> pageComment2(Integer pageNum, Integer postId) {
 
         @AllArgsConstructor
         @EqualsAndHashCode
@@ -160,7 +160,7 @@ public class DiscussPostServiceImpl extends ServiceImpl<DiscussPostMapper, Discu
 
         Page<Comment> commentPage = commentService.lambdaQuery()
                 .eq(Comment::getEntityType, EntityType.POST)
-                .eq(Comment::getEntityId, discussPostId)
+                .eq(Comment::getEntityId, postId)
                 .orderByAsc(Comment::getCreateTime)
                 .page(new Page<>(pageNum, Constants.PAGE_SIZE));
 

@@ -41,6 +41,11 @@ spring:
     host: 114.132.182.241
     port: 6379
     password: MyPassword@333
+  kafka:
+    bootstrap-servers: 114.132.182.241:9092
+    consumer:
+      enable-auto-commit: true
+      group-id: community-consumer-group
 
 mybatis-plus:
   configuration:

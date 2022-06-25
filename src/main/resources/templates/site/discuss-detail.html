@@ -41,7 +41,7 @@
                         15:32:18</b>
                         <ul class="d-inline float-right">
                             <li class="d-inline ml-2">
-                                <a href="javascript:;" th:onclick="|like(this, 1, ${discussPost.id}, ${discussPost.user.id})|"
+                                <a href="javascript:;" th:onclick="|like(this, 1, ${discussPost.id}, ${discussPost.user.id}, ${discussPost.id})|"
                                    class="text-primary">
                                     <b>[[${discussPost.likeStatus==0 ? '赞':'已赞'}]]</b> <i>[[${discussPost.likeCount}]]</i>
                                 </a>
@@ -98,7 +98,7 @@
                             <span>发布于 <b th:text="${#temporals.format(comment.createTime, 'yyyy-MM-dd HH:mm:ss')}">2019-04-15 15:32:18</b></span>
                             <ul class="d-inline float-right">
                                 <li class="d-inline ml-2">
-                                    <a href="javascript:void(0);" th:onclick="|like(this, 2, ${comment.id}, ${comment.user.id})|"
+                                    <a href="javascript:void(0);" th:onclick="|like(this, 2, ${comment.id}, ${comment.user.id}, ${discussPost.id})|"
                                        class="text-primary">
                                         <b>[[${comment.likeStatus==0 ? '赞':'已赞'}]]</b>(<i>[[${comment.likeCount}]]</i>)
                                     </a>
@@ -131,7 +131,7 @@
                                     <span th:text="${#temporals.format(reply.createTime, 'yyyy-MM-dd HH:mm:ss')}">2019-04-15 15:32:18</span>
                                     <ul class="d-inline float-right">
                                         <li class="d-inline ml-2">
-                                            <a href="javascript:void(0);" th:onclick="|like(this, 2, ${reply.id}, ${reply.user.id})|"
+                                            <a href="javascript:void(0);" th:onclick="|like(this, 2, ${reply.id}, ${reply.user.id}, ${discussPost.id})|"
                                                class="text-primary">
                                                 <b>[[${reply.likeStatus==0 ? '赞':'已赞'}]]</b>(<i>[[${reply.likeCount}]]</i>)
                                             </a>
@@ -202,16 +202,17 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" crossorigin="anonymous"></script>
 <script th:src="@{/js/global.js}"></script>
 <script type="text/javascript">
-    function like(obj, entityType, entityId, toUserId) {
+    function like(obj, entityType, entityId, toUserId, postId) {
         $.post(
             CONTEXT_PATH + '/like',
-            {'entityType': entityType, 'entityId': entityId, 'toUserId': toUserId},
+            {'entityType': entityType, 'entityId': entityId, 'toUserId': toUserId, 'postId': postId},
             function (resp) {
                 if (resp.code == 200) {
                     $(obj).children('b').text(resp.data.likeStatus == 1 ? '已赞':'赞')
                     $(obj).children('i').text(resp.data.likeCount)
                 } else {
-                    alert(resp.msg)
+                    obj = JSON.parse(resp)
+                    alert(obj.msg)
                 }
             }
         )

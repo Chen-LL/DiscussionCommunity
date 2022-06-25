@@ -15,10 +15,18 @@ import java.util.Map;
  */
 public interface MessageService extends IService<Message> {
 
-    Map<String, Object> getMessageIndex(int pageNum);
+    Map<String, Object> getMessageIndex(int pageNum, int userId);
 
 
     Map<String, Object> letterDetailPage(String conversationId, int pageNum);
 
     void saveMessage(String username, String content);
+
+    Map<String, Object> getNoticeList(Integer userId);
+
+    int countUnreadNotice(Integer userId);
+
+    int countUnreadLetter(Integer userId);
+
+    Map<String, Object> getNoticeDetail(String topic, int pageNum, int userId);
 }

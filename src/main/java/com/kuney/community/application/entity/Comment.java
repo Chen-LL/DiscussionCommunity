@@ -9,7 +9,6 @@ import lombok.EqualsAndHashCode;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -22,7 +21,7 @@ import java.util.List;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class Comment implements Serializable {
+public class Comment extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -52,8 +51,6 @@ public class Comment implements Serializable {
     private String content;
 
     private Integer status;
-
-    private LocalDateTime createTime;
 
     @TableField(exist = false)
     private List<Comment> replyList;

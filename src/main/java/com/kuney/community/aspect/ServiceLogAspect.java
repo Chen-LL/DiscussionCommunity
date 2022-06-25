@@ -29,6 +29,9 @@ public class ServiceLogAspect {
     public void before(JoinPoint joinPoint) {
         // 用户[ip], 在[datetime], 访问了[type.method].
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (attributes == null) {
+            return;
+        }
         HttpServletRequest request = attributes.getRequest();
         String ip = request.getRemoteHost();
         String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));

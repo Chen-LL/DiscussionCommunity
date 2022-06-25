@@ -5,6 +5,9 @@ import com.kuney.community.annotation.LoginRequired;
 import com.kuney.community.application.entity.User;
 import com.kuney.community.application.service.FollowService;
 import com.kuney.community.application.service.UserService;
+import com.kuney.community.event.Event;
+import com.kuney.community.event.EventProducer;
+import com.kuney.community.util.Constants;
 import com.kuney.community.util.Constants.EntityType;
 import com.kuney.community.util.HostHolder;
 import com.kuney.community.util.PageUtils;
@@ -23,11 +26,12 @@ import java.util.Map;
 @RequestMapping("follow")
 @Controller
 @AllArgsConstructor
-public class FollowController {
+public class FollowController implements Constants.KafkaTopic {
 
     private FollowService followService;
     private HostHolder hostHolder;
     private UserService userService;
+    private EventProducer eventProducer;
 
     @LoginRequired
     @PostMapping
@@ -36,6 +40,14 @@ public class FollowController {
         User user = hostHolder.getUser();
         followService.follow(user.getId(), entityType, entityId);
         long count = followService.followerCount(EntityType.USER, entityId);
+
+        Event event = new Event();
+        event.setTopic(FOLLOW);
+        event.setUserId(user.getId());
+        event.setEntityType(entityType);
+        event.setEntityId(entityId);
+        event.setEntityUserId(entityId);
+        eventProducer.sendMessage(event);
         return Result.data(count);
     }
 

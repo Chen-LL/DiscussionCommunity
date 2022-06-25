@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
  * <p>
@@ -19,7 +18,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class Message implements Serializable {
+public class Message extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -38,8 +37,6 @@ public class Message implements Serializable {
      * 0-未读;1-已读;2-删除;
      */
     private Integer status;
-
-    private LocalDateTime createTime;
 
     @TableField(exist = false)
     private User from;

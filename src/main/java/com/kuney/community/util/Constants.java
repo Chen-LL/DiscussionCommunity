@@ -7,6 +7,7 @@ package com.kuney.community.util;
 public interface Constants {
     int PAGE_NUM = 1;
     int PAGE_SIZE = 10;
+    int SYSTEM_USER_ID = 1;
 
     /**
      * 账号激活状态码
@@ -60,5 +61,11 @@ public interface Constants {
     interface LikeStatus {
         int UNLIKE = 0;
         int LIKED = 1;
+    }
+
+    interface KafkaTopic {
+        String LIKE = "like";
+        String COMMENT = "comment";
+        String FOLLOW = "follow";
     }
 }
