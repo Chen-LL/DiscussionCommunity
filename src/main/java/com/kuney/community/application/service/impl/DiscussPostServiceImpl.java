@@ -14,13 +14,15 @@ import com.kuney.community.exception.CustomException;
 import com.kuney.community.util.*;
 import com.kuney.community.util.Constants.EntityType;
 import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -97,10 +99,22 @@ public class DiscussPostServiceImpl extends ServiceImpl<DiscussPostMapper, Discu
         return data;
     }
 
+    // @Transactional
+    @Override
+    public void setStatus(int postId, int status) {
+        this.lambdaUpdate()
+                .set(DiscussPost::getStatus, status)
+                .eq(DiscussPost::getId, postId)
+                .update();
+        if (status == 2) {
+            // 删除评论...
+        }
+    }
+
     /**
-     * 获取帖子的评论列表（版本1）
+     * 获取帖子的评论列表
      *
-     * @param pageNum       当前页
+     * @param pageNum 当前页
      * @param postId 帖子id
      * @return
      */
@@ -142,72 +156,4 @@ public class DiscussPostServiceImpl extends ServiceImpl<DiscussPostMapper, Discu
         return commentPage;
     }
 
-    /**
-     * 获取帖子的评论列表（版本2）
-     * 将循环查询数据库优化为查询一遍数据库，在内存中组装评论间的关系
-     * @param pageNum 当前页
-     * @param postId 帖子id
-     * @return
-     */
-    private Page<Comment> pageComment2(Integer pageNum, Integer postId) {
-
-        @AllArgsConstructor
-        @EqualsAndHashCode
-        class CommentKey {
-            private int entityId;
-            private int entityType;
-        }
-
-        Page<Comment> commentPage = commentService.lambdaQuery()
-                .eq(Comment::getEntityType, EntityType.POST)
-                .eq(Comment::getEntityId, postId)
-                .orderByAsc(Comment::getCreateTime)
-                .page(new Page<>(pageNum, Constants.PAGE_SIZE));
-
-        // 回帖列表：对帖子的评论
-        List<Comment> comments = commentPage.getRecords();
-        User user = hostHolder.getUser();
-        if (ObjCheckUtils.nonEmpty(comments)) {
-            List<Integer> commentIds = new ArrayList<>();
-            for (Comment comment : comments) {
-                commentIds.add(comment.getId());
-                comment.setUser(userService.getUser(comment.getUserId()));
-                comment.setLikeCount(likeService.likeCount(EntityType.COMMENT, comment.getId()));
-                if (user != null) {
-                    comment.setLikeStatus(likeService.getLikeStatus(EntityType.COMMENT, comment.getId(), user.getId()));
-                }
-            }
-            // 回帖列表对应所有回复
-            List<Comment> allReplyList = commentService.lambdaQuery()
-                    .eq(Comment::getEntityType, EntityType.COMMENT)
-                    .in(Comment::getEntityId, commentIds)
-                    .orderByAsc(Comment::getCreateTime)
-                    .list();
-            if (ObjCheckUtils.nonEmpty(allReplyList)) {
-                // 将回复列表分组，key：实体id+实体类型，value：回复列表
-                Map<CommentKey, List<Comment>> map = new HashMap<>();
-                for (Comment reply : allReplyList) {
-                    CommentKey key = new CommentKey(reply.getEntityId(), reply.getEntityType());
-                    if (!map.containsKey(key)) {
-                        map.put(key, new ArrayList<>());
-                    }
-                    map.get(key).add(reply);
-                    reply.setUser(userService.getUser(reply.getUserId()));
-                    if (reply.getTargetId() != 0) {
-                        reply.setTargetUser(userService.getUser(reply.getTargetId()));
-                    }
-
-                    reply.setLikeCount(likeService.likeCount(EntityType.COMMENT, reply.getId()));
-                    if (user != null) {
-                        reply.setLikeStatus(likeService.getLikeStatus(EntityType.COMMENT, reply.getId(), user.getId()));
-                    }
-                }
-                for (Comment comment : comments) {
-                    CommentKey key = new CommentKey(comment.getId(), EntityType.COMMENT);
-                    comment.setReplyList(map.get(key));
-                }
-            }
-        }
-        return commentPage;
-    }
 }

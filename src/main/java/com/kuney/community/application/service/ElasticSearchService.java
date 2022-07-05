@@ -13,4 +13,6 @@ public interface ElasticSearchService {
     Page<DiscussPost> searchPost(String keyword, int pageNum, int pageSize) throws IOException;
 
     void saveOrUpdatePost(DiscussPost post) throws IOException;
+
+    void deletePost(int postId) throws IOException;
 }

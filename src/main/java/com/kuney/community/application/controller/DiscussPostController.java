@@ -2,10 +2,12 @@ package com.kuney.community.application.controller;
 
 
 import com.kuney.community.annotation.LoginRequired;
+import com.kuney.community.annotation.Permission;
 import com.kuney.community.application.entity.DiscussPost;
 import com.kuney.community.application.service.DiscussPostService;
 import com.kuney.community.event.Event;
 import com.kuney.community.event.EventProducer;
+import com.kuney.community.util.Constants.Role;
 import com.kuney.community.util.Constants.EntityType;
 import com.kuney.community.util.Constants.KafkaTopic;
 import com.kuney.community.util.Result;
@@ -19,7 +21,7 @@ import java.util.Map;
 
 /**
  * <p>
- *  前端控制器
+ * 前端控制器
  * </p>
  *
  * @author kuneychen
@@ -52,12 +54,40 @@ public class DiscussPostController {
     public String detail(@PathVariable Integer id, Model model,
                          @RequestParam(required = false, defaultValue = "1") Integer pageNum) {
         Map<String, Object> data = discussPostService.discussPostDetail(id, pageNum);
-        model.addAttribute("discussPost", data.get("discussPost"));
+        model.addAttribute("post", data.get("discussPost"));
         model.addAttribute("page", data.get("commentPage"));
         model.addAttribute("pageBegin", data.get("pageBegin"));
         model.addAttribute("pageEnd", data.get("pageEnd"));
         model.addAttribute("path", "/discuss-post/" + id);
         return "site/discuss-detail";
+    }
+
+    @Permission(role = Role.MODERATOR)
+    @LoginRequired
+    @PostMapping("{id}/type/{type}")
+    @ResponseBody
+    public Result setType(@PathVariable("id") int postId, @PathVariable("type") int type) {
+        discussPostService.lambdaUpdate()
+                .set(DiscussPost::getType, type)
+                .eq(DiscussPost::getId, postId)
+                .update();
+        return Result.success();
+    }
+
+    @Permission(role = Role.ADMIN)
+    @LoginRequired
+    @PostMapping("{id}/status/{status}")
+    @ResponseBody
+    public Result setStatus(@PathVariable("id") int postId, @PathVariable("status") int status) {
+        discussPostService.setStatus(postId, status);
+
+        String topic = status == 2 ? KafkaTopic.DELETE : KafkaTopic.UPDATE;
+        Event event = new Event();
+        event.setTopic(topic);
+        event.setEntityType(EntityType.POST);
+        event.setEntityId(postId);
+        eventProducer.sendMessage(event);
+        return Result.success();
     }
 }
 

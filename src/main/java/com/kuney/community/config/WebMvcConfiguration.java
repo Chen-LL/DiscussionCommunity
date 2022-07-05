@@ -1,6 +1,6 @@
 package com.kuney.community.config;
 
-import com.kuney.community.interceptor.LoginRequiredInterceptor;
+import com.kuney.community.interceptor.AuthenticateInterceptor;
 import com.kuney.community.interceptor.LoginTicketInterceptor;
 import com.kuney.community.interceptor.MessageInterceptor;
 import lombok.AllArgsConstructor;
@@ -20,7 +20,7 @@ import java.util.List;
 @AllArgsConstructor
 public class WebMvcConfiguration implements WebMvcConfigurer {
 
-    private LoginRequiredInterceptor loginRequiredInterceptor;
+    private AuthenticateInterceptor authenticateInterceptor;
     private LoginTicketInterceptor loginTicketInterceptor;
     private MessageInterceptor messageInterceptor;
 
@@ -29,7 +29,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
         List<String> patterns = Arrays.asList("/error", "/**/*.css", "/**/*.js", "/**/*.png ", "/**/*.jpg", "/**/*.jpeg");
         registry.addInterceptor(loginTicketInterceptor)
                 .excludePathPatterns(patterns);
-        registry.addInterceptor(loginRequiredInterceptor)
+        registry.addInterceptor(authenticateInterceptor)
                 .excludePathPatterns(patterns);
         registry.addInterceptor(messageInterceptor);
     }

@@ -59,7 +59,7 @@ public class CommentController {
         // 发送更新es文档的消息
         if (EntityType.POST == comment.getEntityType()) {
             event = new Event();
-            event.setTopic(KafkaTopic.ADD_COMMENT);
+            event.setTopic(KafkaTopic.UPDATE);
             event.setEntityId(postId);
             event.setEntityType(EntityType.POST);
             event.setUserId(comment.getUserId());

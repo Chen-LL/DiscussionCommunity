@@ -77,4 +77,12 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
                 .document(post)
         );
     }
+
+    @Override
+    public void deletePost(int postId) throws IOException {
+        esClient.delete(d -> d
+                .index("discusspost")
+                .id(String.valueOf(postId))
+        );
+    }
 }

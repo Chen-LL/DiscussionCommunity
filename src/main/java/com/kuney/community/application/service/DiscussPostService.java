@@ -21,4 +21,6 @@ public interface DiscussPostService extends IService<DiscussPost> {
     void saveDiscussPost(DiscussPost discussPost);
 
     Map<String, Object> discussPostDetail(Integer id, Integer pageNum);
+
+    void setStatus(int postId, int status);
 }

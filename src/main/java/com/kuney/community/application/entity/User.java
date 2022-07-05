@@ -41,7 +41,7 @@ public class User extends BaseEntity implements Serializable {
     private String email;
 
     /**
-     * 0-普通用户; 1-超级管理员; 2-版主;
+     * 0-普通用户; 1-版主; 2-超级管理员;
      */
     private Integer type;
 

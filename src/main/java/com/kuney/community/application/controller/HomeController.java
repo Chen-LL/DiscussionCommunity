@@ -30,7 +30,7 @@ public class HomeController {
         model.addAttribute("pageBegin", range[0]);
         model.addAttribute("pageEnd", range[1]);
         model.addAttribute("path", "/index");
-        return "index";
+        return "home";
     }
 
 }

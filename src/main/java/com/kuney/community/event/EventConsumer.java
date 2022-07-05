@@ -57,8 +57,8 @@ public class EventConsumer implements Constants.KafkaTopic {
         messageService.save(message);
     }
 
-    @KafkaListener(topics = {ADD_COMMENT, PUBLISH})
-    public void handleEsEvent(ConsumerRecord<String, String> record) throws IOException {
+    @KafkaListener(topics = {UPDATE, PUBLISH})
+    public void handleUpdateEvent(ConsumerRecord<String, String> record) throws IOException {
         if (record == null || ObjCheckUtils.isBlank(record.value())) {
             log.error("消息内容为空！");
             return;
@@ -69,6 +69,20 @@ public class EventConsumer implements Constants.KafkaTopic {
             return;
         }
         esService.saveOrUpdatePost(discussPostService.getById(event.getEntityId()));
+    }
+
+    @KafkaListener(topics = {DELETE})
+    public void handleDeleteEvent(ConsumerRecord<String, String> record) throws IOException {
+        if (record == null || ObjCheckUtils.isBlank(record.value())) {
+            log.error("消息内容为空！");
+            return;
+        }
+        Event event = JSONObject.parseObject(record.value(), Event.class);
+        if (event == null) {
+            log.error("消息格式错误！");
+            return;
+        }
+        esService.deletePost(event.getEntityId());
     }
 
 }

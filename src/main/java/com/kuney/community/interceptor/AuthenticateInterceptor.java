@@ -1,6 +1,7 @@
 package com.kuney.community.interceptor;
 
 import com.kuney.community.annotation.LoginRequired;
+import com.kuney.community.annotation.Permission;
 import com.kuney.community.exception.CustomException;
 import com.kuney.community.util.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
  * @since 2022/6/12 21:48
  */
 @Component
-public class LoginRequiredInterceptor implements HandlerInterceptor {
+public class AuthenticateInterceptor implements HandlerInterceptor {
 
     @Autowired
     private HostHolder hostHolder;
@@ -26,14 +27,25 @@ public class LoginRequiredInterceptor implements HandlerInterceptor {
         if (handler instanceof HandlerMethod) {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
             LoginRequired loginRequired = handlerMethod.getMethodAnnotation(LoginRequired.class);
+            String requestType = request.getHeader("x-requested-with");
             if (loginRequired != null && hostHolder.getUser() == null) {
-                String requestType = request.getHeader("x-requested-with");
                 if ("XMLHttpRequest".equals(requestType)) {
-                    throw new CustomException(403, "请先登录");
+                    throw new CustomException(403, "请先登录！");
                 } else {
                     response.sendRedirect(request.getContextPath() + "/user/login");
                 }
                 return false;
+            }
+            Permission permission = handlerMethod.getMethodAnnotation(Permission.class);
+            if (permission != null) {
+                if (permission.role() > hostHolder.getUser().getType()) {
+                    if ("XMLHttpRequest".equals(requestType)) {
+                        throw new CustomException(403, "权限不足！");
+                    } else {
+                        response.sendRedirect(request.getContextPath() + "/user/login");
+                    }
+                    return false;
+                }
             }
         }
         return true;

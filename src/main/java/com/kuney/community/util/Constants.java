@@ -67,7 +67,14 @@ public interface Constants {
         String LIKE = "like";
         String COMMENT = "comment";
         String FOLLOW = "follow";
-        String ADD_COMMENT = "add_comment";
+        String UPDATE = "update";
         String PUBLISH = "publish";
+        String DELETE = "delete";
+    }
+
+    interface Role {
+        int USER = 0;
+        int MODERATOR = 1;
+        int ADMIN = 2;
     }
 }
