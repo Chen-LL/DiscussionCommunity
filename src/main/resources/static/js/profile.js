@@ -14,7 +14,10 @@ function follow() {
 					$(btn).text("已关注").removeClass("btn-info").addClass("btn-secondary");
 					$('#follower').text(resp.data)
 				} else {
-					alert(resp.msg)
+					if (typeof(resp) == 'string') {
+                        resp = JSON.parse(resp)
+                    }
+                    alert(resp.msg)
 				}
 			}
 		)
@@ -28,7 +31,10 @@ function follow() {
 					$(btn).text("关注TA").removeClass("btn-secondary").addClass("btn-info");
 					$('#follower').text(resp.data)
 				} else {
-					alert(resp.msg)
+					if (typeof(resp) == 'string') {
+                        resp = JSON.parse(resp)
+                    }
+                    alert(resp.msg)
 				}
 			}
 		)

@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
@@ -43,6 +45,15 @@ public class GlobalExceptionHandler {
     public Result bindException(BindException e) {
         String message = e.getBindingResult().getAllErrors()
                 .stream().map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .collect(Collectors.joining(";"));
+        return Result.fail(message);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseBody
+    public Result constraintViolationException(ConstraintViolationException e) {
+        String message = e.getConstraintViolations()
+                .stream().map(ConstraintViolation::getMessage)
                 .collect(Collectors.joining(";"));
         return Result.fail(message);
     }

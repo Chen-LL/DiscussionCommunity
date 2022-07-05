@@ -7,7 +7,10 @@ function like(obj, entityType, entityId, toUserId, postId) {
                 $(obj).children('b').text(resp.data.likeStatus == 1 ? '已赞':'赞')
                 $(obj).children('i').text(resp.data.likeCount)
             } else {
-                alert(resp.msg)
+                if (typeof(resp) == 'string') {
+                        resp = JSON.parse(resp)
+                    }
+                    alert(resp.msg)
             }
         }
     )
@@ -31,7 +34,10 @@ function setType(obj, postId, type) {
             if (resp.code == 200) {
                 $(obj).text(type == 0 ? '置顶' : '取消置顶')
             } else {
-                alert(resp.msg)
+                if (typeof(resp) == 'string') {
+                        resp = JSON.parse(resp)
+                    }
+                    alert(resp.msg)
             }
         }
     )
@@ -56,7 +62,10 @@ function setStatus(obj, postId, status) {
                     $(obj).text(status == 0 ? '加精' : '取消加精')
                 }
             } else {
-                alert(resp.msg)
+                if (typeof(resp) == 'string') {
+                        resp = JSON.parse(resp)
+                    }
+                    alert(resp.msg)
             }
         }
     )

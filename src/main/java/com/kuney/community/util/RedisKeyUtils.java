@@ -14,6 +14,8 @@ public class RedisKeyUtils {
     private final static String LOGIN_CODE_PREFIX = "login:code:";
     private final static String LOGIN_TICKET_PREFIX = "login:ticket:";
     private final static String USER_PREFIX = "user:";
+    private final static String UV_PREFIX = "uv:";
+    private final static String DAU_PREFIX = "dau:";
 
     /**
      *
@@ -64,5 +66,21 @@ public class RedisKeyUtils {
 
     public static String getUserKey(int userId) {
         return USER_PREFIX + userId;
+    }
+
+    public static String getUVKey(String date) {
+        return UV_PREFIX + date;
+    }
+
+    public static String getUVKey(String begin, String end) {
+        return UV_PREFIX + begin + DELIMITER + end;
+    }
+
+    public static String getDAUKey(String date) {
+        return DAU_PREFIX + date;
+    }
+
+    public static String getDAUKey(String begin, String end) {
+        return DAU_PREFIX + begin + DELIMITER + end;
     }
 }
