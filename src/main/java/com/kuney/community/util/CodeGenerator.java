@@ -3,6 +3,7 @@ package com.kuney.community.util;
 import com.baomidou.mybatisplus.generator.AutoGenerator;
 import com.baomidou.mybatisplus.generator.config.*;
 import com.baomidou.mybatisplus.generator.config.rules.NamingStrategy;
+import com.kuney.community.application.entity.BaseEntity;
 
 /**
  * @author kuneychen
@@ -49,13 +50,13 @@ public class CodeGenerator {
         StrategyConfig strategy = new StrategyConfig();
         strategy.setNaming(NamingStrategy.underline_to_camel);
         strategy.setColumnNaming(NamingStrategy.underline_to_camel);
-        // strategy.setSuperEntityClass(BaseEntity.class);
+        strategy.setSuperEntityClass(BaseEntity.class);
         strategy.setEntityLombokModel(true);
         strategy.setRestControllerStyle(false);
         // 公共父类
         // strategy.setSuperControllerClass("");
         // 写于父类中的公共字段
-        // strategy.setSuperEntityColumns("create_time", "update_time");
+        strategy.setSuperEntityColumns("create_time");
         strategy.setInclude(tables);
         strategy.setControllerMappingHyphenStyle(true);
         // strategy.setTablePrefix(pc.getModuleName() + "_");

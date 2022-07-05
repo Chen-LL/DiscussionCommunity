@@ -37,5 +37,6 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
         registry.addViewController("/error").setViewName("error/500");
+        registry.addRedirectViewController("/", "/index");
     }
 }

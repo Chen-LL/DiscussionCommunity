@@ -46,7 +46,10 @@ spring:
     consumer:
       enable-auto-commit: true
       group-id: community-consumer-group
-
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+elasticsearch:
+  host: localhost
+  port: 9200

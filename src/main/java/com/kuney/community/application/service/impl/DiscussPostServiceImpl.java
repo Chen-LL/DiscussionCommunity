@@ -47,7 +47,7 @@ public class DiscussPostServiceImpl extends ServiceImpl<DiscussPostMapper, Discu
     public Page<DiscussPost> getIndexPage(Integer pageNum) {
         Page<DiscussPost> page = this.lambdaQuery()
                 .ne(DiscussPost::getStatus, 2)
-                .orderByDesc(DiscussPost::getType, DiscussPost::getStatus, DiscussPost::getCreateTime)
+                .orderByDesc(DiscussPost::getType, DiscussPost::getCreateTime)
                 .page(new Page<>(pageNum, Constants.PAGE_SIZE));
         List<DiscussPost> discussPosts = page.getRecords();
         if (ObjCheckUtils.nonEmpty(discussPosts)) {

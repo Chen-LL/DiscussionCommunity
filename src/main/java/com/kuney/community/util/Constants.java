@@ -67,5 +67,7 @@ public interface Constants {
         String LIKE = "like";
         String COMMENT = "comment";
         String FOLLOW = "follow";
+        String ADD_COMMENT = "add_comment";
+        String PUBLISH = "publish";
     }
 }

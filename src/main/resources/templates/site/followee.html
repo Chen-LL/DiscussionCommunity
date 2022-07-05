@@ -50,7 +50,7 @@
 							</h6>
 							<div>
 								<button th:if="${loginUser==null}" th:value="${item.user.id}" type="button"
-										class="btn btn-info btn-sm float-right follow-btn">已关注</button>
+										class="btn btn-info btn-sm float-right follow-btn">关注TA</button>
 								<button th:if="${loginUser!=null and loginUser.id!=item.user.id}"
 										th:value="${item.user.id}" type="button"
 										th:text="${item.isFollowed ? '已关注' : '关注TA'}"

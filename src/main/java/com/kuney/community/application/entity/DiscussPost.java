@@ -8,7 +8,6 @@ import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
  * <p>
@@ -45,8 +44,6 @@ public class DiscussPost extends BaseEntity implements Serializable {
      */
     private Integer status;
 
-    private LocalDateTime createTime;
-
     private Integer commentCount;
 
     private Double score;
@@ -55,8 +52,9 @@ public class DiscussPost extends BaseEntity implements Serializable {
     private User user;
 
     @TableField(exist = false)
-    private long likeCount;
+    private Long likeCount;
 
     @TableField(exist = false)
-    private int likeStatus;
+    private Integer likeStatus;
+
 }

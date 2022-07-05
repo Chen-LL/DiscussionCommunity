@@ -8,10 +8,11 @@ import com.kuney.community.application.service.CommentService;
 import com.kuney.community.application.service.DiscussPostService;
 import com.kuney.community.event.Event;
 import com.kuney.community.event.EventProducer;
-import com.kuney.community.util.Constants.KafkaTopic;
 import com.kuney.community.util.Constants.EntityType;
+import com.kuney.community.util.Constants.KafkaTopic;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,7 +36,7 @@ public class CommentController {
 
     @LoginRequired
     @PostMapping("{postId}")
-    public String addComment(@PathVariable int postId, Comment comment) {
+    public String addComment(@PathVariable int postId, @Validated Comment comment) {
         commentService.addComment(comment);
 
         Event event = new Event();
@@ -44,6 +45,7 @@ public class CommentController {
         event.setEntityType(comment.getEntityType());
         event.setEntityId(comment.getEntityId());
         event.setData("postId", postId);
+
         if (EntityType.POST == comment.getEntityType()) {
             DiscussPost discussPost = discussPostService.getById(postId);
             event.setEntityUserId(discussPost.getUserId());
@@ -51,7 +53,18 @@ public class CommentController {
             Comment target = commentService.getById(comment.getEntityId());
             event.setEntityUserId(target.getUserId());
         }
+        // 发送评论通知
         eventProducer.sendMessage(event);
+
+        // 发送更新es文档的消息
+        if (EntityType.POST == comment.getEntityType()) {
+            event = new Event();
+            event.setTopic(KafkaTopic.ADD_COMMENT);
+            event.setEntityId(postId);
+            event.setEntityType(EntityType.POST);
+            event.setUserId(comment.getUserId());
+            eventProducer.sendMessage(event);
+        }
         return "redirect:/discuss-post/" + postId;
     }
 
