@@ -46,10 +46,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class UserController {
 
-    @Value("${server.servlet.context-path}")
-    private String contextPath;
-    @Value("${community.domain}")
-    private String domain;
     @Value("${user.image.path}")
     private String imagePath;
 
@@ -184,8 +180,7 @@ public class UserController {
             model.addAttribute("uploadMsg", "文件格式错误！仅支持.png, .jpg, .jpeg格式文件");
             return "site/setting";
         }
-        String fileName = communityUtils.uploadImage(headImage, suffix);
-        String url = domain + contextPath + "/user/header/" + fileName;
+        String url = communityUtils.uploadFile(headImage, suffix);
         userService.lambdaUpdate()
                 .set(User::getHeaderUrl, url)
                 .eq(User::getId, hostHolder.getUser().getId())
@@ -209,7 +204,6 @@ public class UserController {
             }
         } catch (IOException e) {
             log.error("获取头像失败：{}", e.getMessage());
-            e.printStackTrace();
         }
     }
 

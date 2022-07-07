@@ -7,6 +7,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+import com.kuney.community.util.Constants.Location;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -31,6 +32,10 @@ public class CommunityUtils {
     private String path;
     @Value("${user.image.upload-location}")
     private String location;
+    @Value("${server.servlet.context-path}")
+    private String contextPath;
+    @Value("${community.domain}")
+    private String domain;
 
     /**
      * 发送简单邮件
@@ -49,27 +54,37 @@ public class CommunityUtils {
             javaMailSender.send(mimeMessage);
         } catch (MessagingException e) {
             log.error("发送邮件失败：{}", e.getMessage());
-            e.printStackTrace();
         }
     }
 
-    public String uploadImage(MultipartFile headImage, String suffix) {
-        if (Constants.Location.LOCAL.equals(location)) {
-            return uploadToLocal(headImage, suffix);
+    /**
+     * 上传图片
+     * @param file 图片
+     * @param suffix 文件后缀
+     * @return
+     */
+    public String uploadFile(MultipartFile file, String suffix) {
+        String url = null;
+        switch (location) {
+            case Location.LOCAL:
+                url = uploadToLocal(file, suffix);
+                break;
+            case Location.REMOTE:
+                // TODO 上传到云服务
+                break;
         }
-        // TODO 上传到云服务
-        return "";
+        return url;
     }
 
-    private String uploadToLocal(MultipartFile headImage, String suffix) {
+    private String uploadToLocal(MultipartFile file, String suffix) {
         String fileName = UUID.randomUUID().toString().replaceAll("-", "") + suffix;
         String dest = path + fileName;
         try {
-            headImage.transferTo(new File(dest));
+            file.transferTo(new File(dest));
         } catch (IOException e) {
             log.error("上传文件失败：{}", e.getMessage());
-            e.printStackTrace();
         }
-        return fileName;
+        String url = domain + "/" + contextPath + "/user/header/" + fileName;
+        return url;
     }
 }
