@@ -23,16 +23,19 @@
                 <img src="http://static.nowcoder.com/images/img/icons/ico-discuss.png"/>
                 <span th:utext="${post.title}">备战春招，面试刷题跟他复习，一个月全搞定！</span>
                 <div class="float-right" th:if="${loginUser != null and loginUser.type != 0}">
-                    <button type="button" class="btn btn-danger btn-sm" th:if="${loginUser.type >= 1}"
-                            th:onclick="|setType(this, ${post.id}, ${post.type})|">
+                    <button type="button" class="btn btn-danger btn-sm"
+                            th:if="${loginUser.type >= 1}" th:value="${post.type}"
+                            th:onclick="|setType(this, ${post.id})|">
                         [[${post.type == 0 ? '置顶' : '取消置顶'}]]
                     </button>
-                    <button type="button" class="btn btn-danger btn-sm" th:if="${loginUser.type >= 1}"
-                            th:onclick="|setStatus(this, ${post.id}, ${post.status})|">
+                    <button type="button" class="btn btn-danger btn-sm"
+                            th:if="${loginUser.type >= 1}" th:value="${post.status}"
+                            th:onclick="|setStatus(this, ${post.id})|">
                         [[${post.status == 0 ? '加精' : '取消加精'}]]
                     </button>
-                    <button type="button" class="btn btn-danger btn-sm" th:if="${loginUser.type == 2}"
-                            th:onclick="|setStatus(this, ${post.id}, 2)|">删除</button>
+                    <button type="button" class="btn btn-danger btn-sm"
+                            th:if="${loginUser.type == 2}" value="2"
+                            th:onclick="|setStatus(this, ${post.id})|">删除</button>
                 </div>
             </h6>
             <!-- 作者 -->

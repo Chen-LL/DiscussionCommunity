@@ -1,6 +1,7 @@
 package com.kuney.community.application.service.impl;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.HighlightField;
 import co.elastic.clients.elasticsearch.core.search.Hit;
@@ -43,7 +44,10 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
                                 .query(keyword)
                                 .analyzer("ik_smart")
                         )
-                ).highlight(h -> h
+                )
+                .sort(s -> s.field(f -> f.field("score").order(SortOrder.Desc)))
+                .sort(s -> s.field(f -> f.field("createTime").order(SortOrder.Desc)))
+                .highlight(h -> h
                         .preTags("<em>").postTags("</em>")
                         .fields("title", new HighlightField.Builder().build())
                         .fields("content", new HighlightField.Builder().build())

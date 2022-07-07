@@ -34,6 +34,7 @@
 				
 				<!-- 通知列表 -->
 				<ul class="list-unstyled">
+					<div style="text-align: center; margin-top: 20px;">当前暂无通知！</div>
 					<li th:if="${commentNotice != null}" class="media pb-3 pt-3 mb-3 border-bottom position-relative">
 						<span class="badge badge-danger" th:if="${commentNotice.message.unread > 0}">[[${commentNotice.message.unread}]]</span>
 						<img src="http://static.nowcoder.com/images/head/reply.png" class="mr-4 user-header" alt="通知图标">

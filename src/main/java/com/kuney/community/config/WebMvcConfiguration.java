@@ -4,7 +4,7 @@ import com.kuney.community.interceptor.AuthenticateInterceptor;
 import com.kuney.community.interceptor.DataInterceptor;
 import com.kuney.community.interceptor.LoginTicketInterceptor;
 import com.kuney.community.interceptor.MessageInterceptor;
-import com.kuney.community.util.converter.LocalDateConverter;
+import com.kuney.community.config.converter.LocalDateConverter;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;

@@ -16,6 +16,7 @@ import com.kuney.community.util.Constants.EntityType;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.HtmlUtils;
 
 import java.time.LocalDateTime;
@@ -46,10 +47,12 @@ public class DiscussPostServiceImpl extends ServiceImpl<DiscussPostMapper, Discu
 
     @SuppressWarnings("unchecked")
     @Override
-    public Page<DiscussPost> getIndexPage(Integer pageNum) {
+    public Page<DiscussPost> getPostPage(int pageNum, int isHot) {
         Page<DiscussPost> page = this.lambdaQuery()
                 .ne(DiscussPost::getStatus, 2)
-                .orderByDesc(DiscussPost::getType, DiscussPost::getCreateTime)
+                .orderByDesc(DiscussPost::getType)
+                .orderByDesc(isHot == 0, DiscussPost::getCreateTime)
+                .orderByDesc(isHot == 1, DiscussPost::getScore)
                 .page(new Page<>(pageNum, Constants.PAGE_SIZE));
         List<DiscussPost> discussPosts = page.getRecords();
         if (ObjCheckUtils.nonEmpty(discussPosts)) {
@@ -99,16 +102,34 @@ public class DiscussPostServiceImpl extends ServiceImpl<DiscussPostMapper, Discu
         return data;
     }
 
-    // @Transactional
+    @Transactional
     @Override
     public void setStatus(int postId, int status) {
         this.lambdaUpdate()
                 .set(DiscussPost::getStatus, status)
                 .eq(DiscussPost::getId, postId)
                 .update();
+        // 删除评论
         if (status == 2) {
-            // 删除评论...
+            commentService.lambdaUpdate().set(Comment::getStatus, 2).update();
         }
+    }
+
+    @Override
+    public Page<DiscussPost> getUserPostPage(int pageNum, int userId) {
+        Page<DiscussPost> page = this.lambdaQuery()
+                .eq(DiscussPost::getUserId, userId)
+                .ne(DiscussPost::getStatus, 2)
+                .orderByDesc(DiscussPost::getCreateTime)
+                .page(new Page<>(pageNum, Constants.PAGE_SIZE));
+        for (DiscussPost post : page.getRecords()) {
+            post.setLikeCount(likeService.likeCount(EntityType.POST, post.getId()));
+            if (post.getContent().length() > 200) {
+                String content = post.getContent().substring(0, 200) + "......";
+                post.setContent(content);
+            }
+        }
+        return page;
     }
 
     /**

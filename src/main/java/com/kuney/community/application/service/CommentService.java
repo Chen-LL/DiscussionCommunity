@@ -1,5 +1,6 @@
 package com.kuney.community.application.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kuney.community.application.entity.Comment;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -14,4 +15,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface CommentService extends IService<Comment> {
 
     void addComment(Comment comment);
+
+    Page<Comment> getUserCommentPage(int pageNum, int userId);
 }

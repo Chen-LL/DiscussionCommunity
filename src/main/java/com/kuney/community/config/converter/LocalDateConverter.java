@@ -1,4 +1,4 @@
-package com.kuney.community.util.converter;
+package com.kuney.community.config.converter;
 
 import com.kuney.community.util.ObjCheckUtils;
 import org.springframework.core.convert.converter.Converter;

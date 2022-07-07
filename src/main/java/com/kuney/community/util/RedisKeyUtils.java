@@ -83,4 +83,8 @@ public class RedisKeyUtils {
     public static String getDAUKey(String begin, String end) {
         return DAU_PREFIX + begin + DELIMITER + end;
     }
+
+    public static String getPostScoreKey() {
+        return "post:score";
+    }
 }

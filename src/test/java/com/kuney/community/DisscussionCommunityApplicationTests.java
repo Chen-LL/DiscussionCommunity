@@ -177,7 +177,8 @@ class DisscussionCommunityApplicationTests {
                                     .preTags("<b>").postTags("</b>")
                                     .fields("title", new HighlightField.Builder().build())
                                     .fields("content", new HighlightField.Builder().build())
-                            ).sort(s -> s.field(f -> f.field("score").order(SortOrder.Desc))),
+                            ).sort(s -> s.field(f -> f.field("score").order(SortOrder.Desc)))
+                            .sort(s -> s.field(f -> f.field("createTime").order(SortOrder.Desc))),
                     DiscussPost.class
             );
             long total = response.hits().total().value();

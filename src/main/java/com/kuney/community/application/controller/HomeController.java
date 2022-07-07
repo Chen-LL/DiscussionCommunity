@@ -23,12 +23,15 @@ public class HomeController {
     private DiscussPostService discussPostService;
 
     @GetMapping
-    public String getIndexPage(@RequestParam(required = false, defaultValue = "1") Integer pageNum, Model model) {
-        Page<DiscussPost> page = discussPostService.getIndexPage(pageNum);
+    public String getIndexPage(@RequestParam(required = false, defaultValue = "1") int pageNum,
+                               @RequestParam(required = false, defaultValue = "0") int isHot,
+                               Model model) {
+        Page<DiscussPost> page = discussPostService.getPostPage(pageNum, isHot);
         long[] range = PageUtils.getPageRange(page.getPages(), pageNum);
         model.addAttribute("page", page);
         model.addAttribute("pageBegin", range[0]);
         model.addAttribute("pageEnd", range[1]);
+        model.addAttribute("isHot", isHot);
         model.addAttribute("path", "/index");
         return "home";
     }

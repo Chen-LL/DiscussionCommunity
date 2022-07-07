@@ -2,4 +2,15 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.kuney.community.application.mapper.CommentMapper">
 
+    <select id="selectComments" resultType="com.kuney.community.application.entity.Comment">
+        SELECT p.title as postTitle, c.*
+        FROM discuss_post p
+        JOIN `comment` c
+        ON p.id = c.entity_id
+        WHERE c.entity_type = 1
+        AND c.`status` != 2
+        AND c.`user_id` = #{userId}
+        ORDER BY c.`create_time` DESC
+        LIMIT #{current}, #{limit}
+    </select>
 </mapper>

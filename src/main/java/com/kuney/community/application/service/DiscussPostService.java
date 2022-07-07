@@ -16,11 +16,13 @@ import java.util.Map;
  */
 public interface DiscussPostService extends IService<DiscussPost> {
 
-    Page<DiscussPost> getIndexPage(Integer pageNum);
+    Page<DiscussPost> getPostPage(int pageNum, int isHot);
 
     void saveDiscussPost(DiscussPost discussPost);
 
     Map<String, Object> discussPostDetail(Integer id, Integer pageNum);
 
     void setStatus(int postId, int status);
+
+    Page<DiscussPost> getUserPostPage(int pageNum, int userId);
 }

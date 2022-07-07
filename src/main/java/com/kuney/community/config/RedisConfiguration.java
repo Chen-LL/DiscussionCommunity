@@ -26,9 +26,6 @@ public class RedisConfiguration {
 
         template.setKeySerializer(RedisSerializer.string());
         template.setHashKeySerializer(RedisSerializer.string());
-        // template.setValueSerializer(RedisSerializer.json());
-        // template.setHashValueSerializer(RedisSerializer.json());
-        template.afterPropertiesSet();
 
         // 下面代码解决LocalDateTime序列化与反序列化不一致问题
         Jackson2JsonRedisSerializer<Object> j2jrs = new Jackson2JsonRedisSerializer<>(Object.class);
@@ -42,6 +39,8 @@ public class RedisConfiguration {
         // 序列化 value 时使用此序列化方法
         template.setValueSerializer(j2jrs);
         template.setHashValueSerializer(j2jrs);
+
+        template.afterPropertiesSet();
         return template;
     }
 

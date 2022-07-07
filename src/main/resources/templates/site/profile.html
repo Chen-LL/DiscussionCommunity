@@ -19,13 +19,17 @@
 				<div class="position-relative">
 					<ul class="nav nav-tabs">
 						<li class="nav-item">
-							<a class="nav-link active" href="profile.html">个人信息</a>
+							<a class="nav-link active" href="#">个人信息</a>
 						</li>
 						<li class="nav-item">
-							<a class="nav-link" href="my-post.html">我的帖子</a>
+							<a class="nav-link" th:href="@{/discuss-post/user/{userId}(userId=${userId})}">
+								[[${loginUser == null || loginUser.id != userId ? 'TA':'我'}]]的帖子
+							</a>
 						</li>
 						<li class="nav-item">
-							<a class="nav-link" href="my-reply.html">我的回复</a>
+							<a class="nav-link" th:href="@{/comment/user/{userId}(userId=${userId})}">
+								[[${loginUser == null || loginUser.id != userId ? 'TA':'我'}]]的回复
+							</a>
 						</li>
 					</ul>
 				</div>

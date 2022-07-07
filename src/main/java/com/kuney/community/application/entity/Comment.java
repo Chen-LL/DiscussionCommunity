@@ -64,4 +64,7 @@ public class Comment extends BaseEntity implements Serializable {
     @TableField(exist = false)
     private int likeStatus;
 
+    @TableField(exist = false)
+    private String postTitle;
+
 }

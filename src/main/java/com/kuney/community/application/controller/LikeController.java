@@ -6,10 +6,13 @@ import com.kuney.community.application.service.LikeService;
 import com.kuney.community.event.Event;
 import com.kuney.community.event.EventProducer;
 import com.kuney.community.util.Constants;
+import com.kuney.community.util.Constants.EntityType;
 import com.kuney.community.util.Constants.LikeStatus;
 import com.kuney.community.util.HostHolder;
+import com.kuney.community.util.RedisKeyUtils;
 import com.kuney.community.util.Result;
 import lombok.AllArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,6 +32,7 @@ public class LikeController implements Constants.KafkaTopic {
     private LikeService likeService;
     private HostHolder hostHolder;
     private EventProducer eventProducer;
+    private RedisTemplate<String, Object> redisTemplate;
 
     @PostMapping
     @LoginRequired
@@ -50,6 +54,9 @@ public class LikeController implements Constants.KafkaTopic {
             event.setEntityUserId(toUserId);
             event.setData("postId", postId);
             eventProducer.sendMessage(event);
+        }
+        if (entityType == EntityType.POST) {
+            redisTemplate.opsForSet().add(RedisKeyUtils.getPostScoreKey(), postId);
         }
         return Result.data(data);
     }

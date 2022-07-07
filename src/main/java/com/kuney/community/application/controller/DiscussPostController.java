@@ -1,17 +1,21 @@
 package com.kuney.community.application.controller;
 
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kuney.community.annotation.LoginRequired;
 import com.kuney.community.annotation.Permission;
 import com.kuney.community.application.entity.DiscussPost;
 import com.kuney.community.application.service.DiscussPostService;
 import com.kuney.community.event.Event;
 import com.kuney.community.event.EventProducer;
-import com.kuney.community.util.Constants.Role;
 import com.kuney.community.util.Constants.EntityType;
 import com.kuney.community.util.Constants.KafkaTopic;
+import com.kuney.community.util.Constants.Role;
+import com.kuney.community.util.PageUtils;
+import com.kuney.community.util.RedisKeyUtils;
 import com.kuney.community.util.Result;
 import lombok.AllArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
@@ -34,6 +38,7 @@ public class DiscussPostController {
 
     private DiscussPostService discussPostService;
     private EventProducer eventProducer;
+    private RedisTemplate<String, Object> redisTemplate;
 
     @PostMapping
     @ResponseBody
@@ -47,6 +52,8 @@ public class DiscussPostController {
         event.setEntityType(EntityType.POST);
         event.setEntityId(discussPost.getId());
         eventProducer.sendMessage(event);
+
+        redisTemplate.opsForSet().add(RedisKeyUtils.getPostScoreKey(), discussPost.getId());
         return Result.success("发布成功！");
     }
 
@@ -87,7 +94,23 @@ public class DiscussPostController {
         event.setEntityType(EntityType.POST);
         event.setEntityId(postId);
         eventProducer.sendMessage(event);
+
+        redisTemplate.opsForSet().add(RedisKeyUtils.getPostScoreKey(), postId);
         return Result.success();
     }
+
+    @GetMapping("user/{userId}")
+    public String getUserPostPage(@RequestParam(required = false, defaultValue = "1") int pageNum,
+                               @PathVariable int userId, Model model) {
+        Page<DiscussPost> page = discussPostService.getUserPostPage(pageNum, userId);
+        long[] range = PageUtils.getPageRange(page.getPages(), pageNum);
+        model.addAttribute("page", page);
+        model.addAttribute("userId", userId);
+        model.addAttribute("pageBegin", range[0]);
+        model.addAttribute("pageEnd", range[1]);
+        model.addAttribute("path", "/discuss-post/user/" + userId);
+        return "site/my-post";
+    }
+
 }
 

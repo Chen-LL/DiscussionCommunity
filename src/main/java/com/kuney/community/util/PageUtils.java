@@ -10,7 +10,7 @@ import java.util.List;
  * @since 2022/6/10 14:47
  */
 public class PageUtils {
-    public static <T> Page<T> handle(long pageNumber, long pageSize, long total, List<T> records) {
+    public static <T> Page<T> handle(long pageNum, long pageSize, long total, List<T> records) {
         List<T> list;
         if (ObjCheckUtils.isEmpty(records)) {
             total = 0;
@@ -18,7 +18,7 @@ public class PageUtils {
         } else {
             list = records;
         }
-        return new Page<T>().setCurrent(pageNumber)
+        return new Page<T>().setCurrent(pageNum)
                 .setTotal(total)
                 .setSize(pageSize)
                 .setRecords(list);

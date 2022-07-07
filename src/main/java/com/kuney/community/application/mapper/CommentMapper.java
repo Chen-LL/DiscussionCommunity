@@ -2,6 +2,9 @@ package com.kuney.community.application.mapper;
 
 import com.kuney.community.application.entity.Comment;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +16,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface CommentMapper extends BaseMapper<Comment> {
 
+    List<Comment> selectComments(@Param("current") int current,
+                                 @Param("limit") int limit,
+                                 @Param("userId") int userId);
 }

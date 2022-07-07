@@ -146,7 +146,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
 
-    @Transactional
     @Override
     public void updatePassword(String newPassword, String ticket, User user) {
         newPassword = EncodeUtils.encodePassword(newPassword, user.getSalt());

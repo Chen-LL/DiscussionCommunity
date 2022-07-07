@@ -1,6 +1,7 @@
 package com.kuney.community.application.controller;
 
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kuney.community.annotation.LoginRequired;
 import com.kuney.community.application.entity.Comment;
 import com.kuney.community.application.entity.DiscussPost;
@@ -10,12 +11,14 @@ import com.kuney.community.event.Event;
 import com.kuney.community.event.EventProducer;
 import com.kuney.community.util.Constants.EntityType;
 import com.kuney.community.util.Constants.KafkaTopic;
+import com.kuney.community.util.PageUtils;
+import com.kuney.community.util.RedisKeyUtils;
 import lombok.AllArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -33,6 +36,7 @@ public class CommentController {
     private CommentService commentService;
     private EventProducer eventProducer;
     private DiscussPostService discussPostService;
+    private RedisTemplate<String, Object> redisTemplate;
 
     @LoginRequired
     @PostMapping("{postId}")
@@ -64,8 +68,22 @@ public class CommentController {
             event.setEntityType(EntityType.POST);
             event.setUserId(comment.getUserId());
             eventProducer.sendMessage(event);
+
+            redisTemplate.opsForSet().add(RedisKeyUtils.getPostScoreKey(), postId);
         }
         return "redirect:/discuss-post/" + postId;
+    }
+
+    @GetMapping("user/{userId}")
+    public String getUserCommentPage(@RequestParam(required = false, defaultValue = "1") int pageNum,
+                                     @PathVariable int userId, Model model) {
+        Page<Comment> page = commentService.getUserCommentPage(pageNum, userId);
+        long[] range = PageUtils.getPageRange(page.getPages(), pageNum);
+        model.addAttribute("page", page);
+        model.addAttribute("pageBegin", range[0]);
+        model.addAttribute("pageEnd", range[1]);
+        model.addAttribute("path", "/comment/user/" + userId);
+        return "site/my-reply";
     }
 
 }
