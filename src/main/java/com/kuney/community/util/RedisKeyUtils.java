@@ -12,7 +12,9 @@ public class RedisKeyUtils {
     private final static String FOLLOWEE_PREFIX = "followee:";
     private final static String FOLLOWER_PREFIX = "follower:";
     private final static String LOGIN_CODE_PREFIX = "login:code:";
+    @Deprecated
     private final static String LOGIN_TICKET_PREFIX = "login:ticket:";
+    private final static String LOGIN_TOKEN_PREFIX = "login:token:";
     private final static String USER_PREFIX = "user:";
     private final static String UV_PREFIX = "uv:";
     private final static String DAU_PREFIX = "dau:";
@@ -60,8 +62,13 @@ public class RedisKeyUtils {
         return  LOGIN_CODE_PREFIX + owner;
     }
 
+    @Deprecated
     public static String getLoginTicketKey(String ticket) {
         return  LOGIN_TICKET_PREFIX + ticket;
+    }
+
+    public static String getLoginTokenKey(int userId) {
+        return  LOGIN_TOKEN_PREFIX + userId;
     }
 
     public static String getUserKey(int userId) {

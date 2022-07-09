@@ -26,17 +26,21 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
-    public void exception(Exception e, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void exception(Exception e, HttpServletRequest request, HttpServletResponse response) {
         log.error("服务器异常：{}", e.getMessage());
         for (StackTraceElement element : e.getStackTrace()) {
             log.error(element.toString());
         }
         String requestType = request.getHeader("x-requested-with");
-        if ("XMLHttpRequest".equals(requestType)) {
-            response.setContentType("application/plain;charset=utf-8");
-            response.getWriter().write(JSONObject.toJSONString(Result.error("服务器异常")));
-        } else {
-            response.sendRedirect(request.getContextPath() + "/error");
+        try {
+            if ("XMLHttpRequest".equals(requestType)) {
+                response.setContentType("application/plain;charset=utf-8");
+                response.getWriter().write(JSONObject.toJSONString(Result.error("服务器异常")));
+            } else {
+                response.sendRedirect(request.getContextPath() + "/error");
+            }
+        } catch (IOException ex) {
+            log.error("服务器响应异常：{}", ex.getMessage());
         }
     }
 

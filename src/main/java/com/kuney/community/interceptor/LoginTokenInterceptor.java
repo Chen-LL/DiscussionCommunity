@@ -2,10 +2,7 @@ package com.kuney.community.interceptor;
 
 import com.kuney.community.application.entity.User;
 import com.kuney.community.application.service.UserService;
-import com.kuney.community.util.CookieUtils;
-import com.kuney.community.util.HostHolder;
-import com.kuney.community.util.ObjCheckUtils;
-import com.kuney.community.util.RedisKeyUtils;
+import com.kuney.community.util.*;
 import lombok.AllArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -21,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 @Component
 @AllArgsConstructor
-public class LoginTicketInterceptor implements HandlerInterceptor {
+public class LoginTokenInterceptor implements HandlerInterceptor {
 
     private UserService userService;
     private HostHolder hostHolder;
@@ -29,10 +26,11 @@ public class LoginTicketInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String ticket = CookieUtils.getValue(request, "ticket");
-        if (ticket != null) {
-            Integer userId = (Integer) redisTemplate.opsForValue().get(RedisKeyUtils.getLoginTicketKey(ticket));
-            if (ObjCheckUtils.nonNull(userId)) {
+        String token = CookieUtils.getValue(request, "token");
+        if (ObjCheckUtils.nonBlank(token)) {
+            int userId = EncodeUtils.parseUserId(token);
+            Object storeToken = redisTemplate.opsForValue().get(RedisKeyUtils.getLoginTokenKey(userId));
+            if (token.equals(storeToken)) {
                 User user = userService.getUser(userId);
                 hostHolder.setUser(user);
             }

@@ -15,7 +15,6 @@ import com.kuney.community.util.RedisKeyUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
@@ -130,30 +129,32 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         ticket.setExpired(LocalDateTime.now().plusSeconds(expireSeconds));
         ticket.setTicket(EncodeUtils.generateTicket(ticket.getUserId()));
         loginTicketService.save(ticket);*/
-        String ticket = EncodeUtils.generateTicket(user.getId());
-        redisTemplate.opsForValue().set(RedisKeyUtils.getLoginTicketKey(ticket), user.getId(), expireSeconds, TimeUnit.SECONDS);
-        result.put("ticket", ticket);
+        // String ticket = EncodeUtils.generateTicket(user.getId());
+        String token = EncodeUtils.generateToken(user.getId(), user.getSalt());
+        redisTemplate.opsForValue().set(RedisKeyUtils.getLoginTokenKey(user.getId()), token, expireSeconds, TimeUnit.SECONDS);
+        result.put("token", token);
         return result;
     }
 
     @Override
-    public void userLogout(String ticket) {
+    public void userLogout(String token) {
         // loginTicketService.lambdaUpdate()
         //         .set(LoginTicket::getStatus, 1)
         //         .eq(LoginTicket::getTicket, ticket)
         //         .update();
-        redisTemplate.delete(RedisKeyUtils.getLoginTicketKey(ticket));
+        int userId = EncodeUtils.parseUserId(token);
+        redisTemplate.delete(RedisKeyUtils.getLoginTokenKey(userId));
     }
 
 
     @Override
-    public void updatePassword(String newPassword, String ticket, User user) {
+    public void updatePassword(String newPassword, String token, User user) {
         newPassword = EncodeUtils.encodePassword(newPassword, user.getSalt());
         this.lambdaUpdate()
                 .set(User::getPassword, newPassword)
                 .eq(User::getId, user.getId())
                 .update();
-        this.userLogout(ticket);
+        this.userLogout(token);
         this.clearCache(user.getId());
     }
 

@@ -34,14 +34,14 @@ public interface UserService extends IService<User> {
      * 用户登录
      * @param username 账号
      * @param password 密码
-     * @param expireSeconds ticket过期时间
-     * @return 返回登录凭证ticket，以及resultCode
+     * @param expireSeconds token过期时间
+     * @return 返回登录凭证token，以及resultCode
      */
     Map<String, Object> userLogin(String username, String password, int expireSeconds);
 
-    void userLogout(String ticket);
+    void userLogout(String token);
 
-    void updatePassword(String newPassword, String ticket, User user);
+    void updatePassword(String newPassword, String token, User user);
 
     User getUser(int id);
 }

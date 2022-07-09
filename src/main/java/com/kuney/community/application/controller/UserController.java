@@ -123,8 +123,8 @@ public class UserController {
         int expireSeconds = rememberMe != null && rememberMe ?
                 Login.REMEMBER_EXPIRE_SECONDS : Login.DEFAULT_EXPIRE_SECONDS;
         Map<String, Object> map = userService.userLogin(username, password, expireSeconds);
-        if (map.containsKey("ticket")) {
-            Cookie cookie = new Cookie("ticket", (String) map.get("ticket"));
+        if (map.containsKey("token")) {
+            Cookie cookie = new Cookie("token", (String) map.get("token"));
             cookie.setMaxAge(expireSeconds);
             cookie.setPath(session.getServletContext().getContextPath());
             response.addCookie(cookie);
@@ -135,8 +135,8 @@ public class UserController {
     }
 
     @GetMapping("logout")
-    public String logout(@CookieValue("ticket") String ticket) {
-        userService.userLogout(ticket);
+    public String logout(@CookieValue("token") String token) {
+        userService.userLogout(token);
         return "redirect:/index";
     }
 
@@ -209,14 +209,14 @@ public class UserController {
 
     @LoginRequired
     @PutMapping("password")
-    public String updatePassword(@CookieValue("ticket") String ticket, Model model,
+    public String updatePassword(@CookieValue("token") String token, Model model,
                                  String oldPassword, String newPassword) {
         User user = hostHolder.getUser();
         if (!StringUtils.equals(user.getPassword(), EncodeUtils.encodePassword(oldPassword, user.getSalt()))) {
             model.addAttribute("msg", "原密码错误！");
             return "site/setting";
         }
-        userService.updatePassword(newPassword, ticket, user);
+        userService.updatePassword(newPassword, token, user);
         model.addAttribute("msg", "密码修改成功，请重新登录！");
         model.addAttribute("target", "/user/login");
         return "site/operate-result";
