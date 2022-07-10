@@ -157,7 +157,6 @@ public class UserController {
             ImageIO.write(image, "png", response.getOutputStream());
         } catch (IOException e) {
             log.error("获取验证码失败：{}", e.getMessage());
-            e.printStackTrace();
         }
     }
 

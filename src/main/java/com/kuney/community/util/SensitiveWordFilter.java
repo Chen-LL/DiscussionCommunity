@@ -38,7 +38,6 @@ public class SensitiveWordFilter {
             }
         } catch (IOException e) {
             log.error("读取敏感词文件失败：{}", e.getMessage());
-            e.printStackTrace();
         }
     }
 

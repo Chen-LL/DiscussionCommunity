@@ -20,7 +20,7 @@ spring:
       filter:
         enabled: true
   thymeleaf:
-    cache: false
+    cache: true
   mail:
     default-encoding: utf-8
     host: smtp.qq.com
