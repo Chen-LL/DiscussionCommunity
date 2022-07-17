@@ -1,6 +1,7 @@
 package com.kuney.community.application.controller;
 
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.google.code.kaptcha.Producer;
 import com.kuney.community.annotation.LoginRequired;
 import com.kuney.community.application.entity.User;
@@ -19,18 +20,24 @@ import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -44,6 +51,7 @@ import java.util.concurrent.TimeUnit;
 @Controller
 @RequestMapping("/user")
 @Slf4j
+@Validated
 public class UserController {
 
     @Value("${user.image.path}")
@@ -56,9 +64,11 @@ public class UserController {
     private LikeService likeService;
     private FollowService followService;
     private RedisTemplate redisTemplate;
+    private TemplateEngine templateEngine;
+    private ThreadPoolExecutor executor;
 
-    public UserController(UserService userService, Producer kaptchaProducer, CommunityUtils communityUtils, HostHolder hostHolder,
-                          LikeService likeService, FollowService followService, RedisTemplate redisTemplate) {
+    public UserController(UserService userService, Producer kaptchaProducer, CommunityUtils communityUtils, HostHolder hostHolder, LikeService likeService,
+                          FollowService followService, RedisTemplate redisTemplate, TemplateEngine templateEngine, ThreadPoolExecutor executor) {
         this.userService = userService;
         this.kaptchaProducer = kaptchaProducer;
         this.communityUtils = communityUtils;
@@ -66,6 +76,8 @@ public class UserController {
         this.likeService = likeService;
         this.followService = followService;
         this.redisTemplate = redisTemplate;
+        this.templateEngine = templateEngine;
+        this.executor = executor;
     }
 
     @GetMapping("register")
@@ -83,6 +95,59 @@ public class UserController {
         }
         model.addAttribute("resultCode", result);
         return "site/register";
+    }
+
+    @GetMapping("forget")
+    public String forget() {
+        return "site/forget";
+    }
+
+    @GetMapping("forget/code")
+    @ResponseBody
+    public Result getCode(@Email String email) {
+        User user = userService.getOne(Wrappers.<User>lambdaQuery().eq(User::getEmail, email));
+        if (ObjCheckUtils.isNull(user)) {
+            return Result.fail("邮箱错误，或该邮箱未注册！");
+        }
+        String key = RedisKeyUtils.getForgetKey(email);
+        if (redisTemplate.opsForValue().get(key) != null) {
+            return Result.fail("获取验证码太频繁，请稍后再获取！");
+        }
+        String code = EncodeUtils.generateCode();
+        CompletableFuture.runAsync(() -> {
+            Context ctx = new Context();
+            ctx.setVariable("username", email);
+            ctx.setVariable("code", code);
+            String content = templateEngine.process("mail/forget", ctx);
+            communityUtils.sendSimpleMail(email, "忘记密码", content);
+        }, executor);
+        redisTemplate.opsForValue().set(key, code, 2, TimeUnit.MINUTES);
+        return Result.success("验证码已发送至邮箱，请注意查收！");
+    }
+
+    @PostMapping("forget/reset")
+    public String resetPassword(@Email String email, @NotBlank String code, @NotBlank String password, Model model) {
+        User user = userService.getOne(Wrappers.<User>lambdaQuery().eq(User::getEmail, email));
+        if (ObjCheckUtils.isNull(user)) {
+            model.addAttribute("emailMsg", "该账号未注册");
+            return "site/forget";
+        }
+        String key = RedisKeyUtils.getForgetKey(email);
+        Object storeCode = redisTemplate.opsForValue().get(key);
+        if (ObjCheckUtils.isNull(storeCode)) {
+            model.addAttribute("msg", "验证码已失效");
+            return "site/forget";
+        }
+        if (!storeCode.equals(code)) {
+            model.addAttribute("msg", "验证码不正确");
+            return "site/forget";
+        }
+        userService.lambdaUpdate()
+                .eq(User::getEmail, email)
+                .set(User::getPassword, EncodeUtils.encodePassword(password, user.getSalt())).update();
+        model.addAttribute("msg", "密码重置成功，您可以前去登录了！");
+        model.addAttribute("target", "/user/login");
+        return "site/operate-result";
     }
 
     @GetMapping("activation/{userId}/{activationCode}")

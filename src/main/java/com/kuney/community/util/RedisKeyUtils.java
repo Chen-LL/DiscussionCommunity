@@ -94,4 +94,8 @@ public class RedisKeyUtils {
     public static String getPostScoreKey() {
         return "post:score";
     }
+
+    public static String getForgetKey(String email) {
+        return USER_PREFIX + "forget:" + email;
+    }
 }

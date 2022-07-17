@@ -33,7 +33,8 @@ public class QuartzConfiguration {
         triggerFactoryBean.setGroup("communityTriggerGroup");
         triggerFactoryBean.setJobDetail(postScoreRefreshJobDetail);
         triggerFactoryBean.setJobDataMap(new JobDataMap());
-        triggerFactoryBean.setRepeatInterval(1000 * 60 * 5); // 每5分钟执行一次
+        // triggerFactoryBean.setRepeatInterval(1000 * 60 * 5); // 测试环境：每5分钟执行一次
+        triggerFactoryBean.setRepeatInterval(1000 * 60 * 60 * 2); // 每2小时执行一次
         return triggerFactoryBean;
     }
 

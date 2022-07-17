@@ -34,6 +34,7 @@ public class PostScoreRefreshJob implements Job {
     private LikeService likeService;
     private ElasticSearchService esService;
 
+    // 论坛纪元
     private static final LocalDateTime epoch;
 
     static {

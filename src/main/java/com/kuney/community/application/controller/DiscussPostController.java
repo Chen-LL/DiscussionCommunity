@@ -81,7 +81,7 @@ public class DiscussPostController {
         return Result.success();
     }
 
-    @Permission(role = Role.ADMIN)
+    @Permission
     @LoginRequired
     @PostMapping("{id}/status/{status}")
     @ResponseBody
@@ -101,7 +101,7 @@ public class DiscussPostController {
 
     @GetMapping("user/{userId}")
     public String getUserPostPage(@RequestParam(required = false, defaultValue = "1") int pageNum,
-                               @PathVariable int userId, Model model) {
+                                  @PathVariable int userId, Model model) {
         Page<DiscussPost> page = discussPostService.getUserPostPage(pageNum, userId);
         long[] range = PageUtils.getPageRange(page.getPages(), pageNum);
         model.addAttribute("page", page);

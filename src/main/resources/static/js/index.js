@@ -8,12 +8,15 @@ function publish() {
     var content = $("#message-text").val();
     var url = CONTEXT_PATH + "/discuss-post";
     var data = {"title": title, "content": content};
-	$.post(url, data, function (result) {
-		$("#hintBody").text(result.msg);
+	$.post(url, data, function (resp) {
+		if (typeof(resp) == 'string') {
+			resp = JSON.parse(resp)
+		}
+		$("#hintBody").text(resp.msg);
 		$("#hintModal").modal("show");
 		setTimeout(function(){
 			$("#hintModal").modal("hide");
-			if(result.code == 200) {
+			if(resp.code == 200) {
 				window.location.reload();
 			}
 		}, 2000);

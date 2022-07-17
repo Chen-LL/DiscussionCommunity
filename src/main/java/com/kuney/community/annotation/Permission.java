@@ -15,6 +15,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Permission {
 
-    int role() default Role.USER;
+    int role() default Role.ADMIN;
 
 }

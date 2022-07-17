@@ -14,11 +14,6 @@ spring:
       initial-size: 10
       max-active: 50
       max-wait: 60000
-  # 开启表单提交 REST风格
-  mvc:
-    hiddenmethod:
-      filter:
-        enabled: true
   thymeleaf:
     cache: true
   mail:
